@@ -1,6 +1,7 @@
 package minitools
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -60,4 +61,13 @@ func (ts *TimeSuiteBasic) UTC2String(layout string, t string) string {
 	rawTime, _ := time.Parse("2006-01-02T15:04:05Z0700", t)
 	uTime := rawTime.Format(layout)
 	return uTime
+}
+
+// RunTime 计算执行时间
+func (ts *TimeSuiteBasic) RunTime() func() {
+	start := time.Now()
+	return func() {
+		tc := time.Since(start)
+		fmt.Printf("Time = %v\n", tc)
+	}
 }
