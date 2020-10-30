@@ -31,3 +31,9 @@ func (ds *DataSuiteBasic) RawArray2Array(data []byte) (m []interface{}) {
 	_ = json.Unmarshal(data, &m)
 	return
 }
+
+// Float2uint 浮点转整型处理
+func (ds *DataSuiteBasic) Float2uint(f float64) int64 {
+	u := int64((f * 100) + 0.5)
+	return u
+}
