@@ -6,29 +6,26 @@ import "encoding/json"
 type DataSuiteBasic struct{}
 
 // MapToRawJSON 任意 map 类型转换为原始 JSON 数据
-func (ds *DataSuiteBasic) MapToRawJSON(data interface{}) []byte {
-	b, _ := json.Marshal(data)
-	return b
+func (ds *DataSuiteBasic) MapToRawJSON(input interface{}) ([]byte, error) {
+	return json.Marshal(input)
 }
 
 // RawMaps2Maps 原始 map 数组转 []map[string]interface{}
-func (ds *DataSuiteBasic) RawMaps2Maps(data []byte) (m []map[string]interface{}) {
-	m = make([]map[string]interface{}, 0)
-	_ = json.Unmarshal(data, &m)
+func (ds *DataSuiteBasic) RawMaps2Maps(input []byte) (output []map[string]interface{}, err error) {
+	err = json.Unmarshal(input, &output)
 	return
 }
 
 // RawMap2Map 原始 map 转 map[string]interface{}
-func (ds *DataSuiteBasic) RawMap2Map(data []byte) (m map[string]interface{}) {
-	m = make(map[string]interface{})
-	_ = json.Unmarshal(data, &m)
+func (ds *DataSuiteBasic) RawMap2Map(input []byte) (output map[string]interface{}, err error) {
+	output = make(map[string]interface{})
+	err = json.Unmarshal(input, &output)
 	return
 }
 
 // RawArray2Array 原始数组类型转 []interface{}
-func (ds *DataSuiteBasic) RawArray2Array(data []byte) (m []interface{}) {
-	m = make([]interface{}, 0)
-	_ = json.Unmarshal(data, &m)
+func (ds *DataSuiteBasic) RawArray2Array(input []byte) (output []interface{}, err error) {
+	err = json.Unmarshal(input, &output)
 	return
 }
 

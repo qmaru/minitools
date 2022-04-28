@@ -4,17 +4,18 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"errors"
 )
 
 // AESSuiteBasic AES 套件基类
 type AESSuiteBasic struct{}
 
 // Encrypt 加密
-func (aess *AESSuiteBasic) Encrypt(plaintext []byte, key []byte, iv []byte) []byte {
+func (aess *AESSuiteBasic) Encrypt(plaintext []byte, key []byte, iv []byte) ([]byte, error) {
 	// 分组密钥
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	// 获取秘钥块的长度
 	blockSize := block.BlockSize()
@@ -26,22 +27,22 @@ func (aess *AESSuiteBasic) Encrypt(plaintext []byte, key []byte, iv []byte) []by
 	if iv == nil {
 		iv = key[:blockSize]
 	} else if len(iv) != blockSize {
-		panic("IV Error: IV length must equal block size")
+		return nil, errors.New("IV Error: IV length must equal block size")
 	}
 	blockMode := cipher.NewCBCEncrypter(block, iv)
 	// 创建加密数组
 	cyphertext := make([]byte, len(paddingData))
 	// 执行加密
 	blockMode.CryptBlocks(cyphertext, paddingData)
-	return cyphertext
+	return cyphertext, nil
 }
 
 // Decrypt 解密函数
-func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) []byte {
+func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) ([]byte, error) {
 	// 分组秘钥
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	// 获取秘钥块的长度
 	blockSize := block.BlockSize()
@@ -49,7 +50,7 @@ func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) []byte 
 	if iv == nil {
 		iv = key[:blockSize]
 	} else if len(iv) != blockSize {
-		panic("IV Error: IV length must equal block size")
+		return nil, errors.New("IV Error: IV length must equal block size")
 	}
 	blockMode := cipher.NewCBCDecrypter(block, iv)
 	// 创建解密数组
@@ -60,5 +61,5 @@ func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) []byte 
 	length := len(plaintext)
 	unpadding := int(plaintext[length-1])
 	plaintext = plaintext[:(length - unpadding)]
-	return plaintext
+	return plaintext, nil
 }
