@@ -1,3 +1,3 @@
-module github.com/aobeom/minitools
+module github.com/qmaru/minitools
 
 go 1.18
