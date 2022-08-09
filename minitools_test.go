@@ -40,7 +40,7 @@ func TestData(t *testing.T) {
 
 func TestFile(t *testing.T) {
 	fs := FileSuite()
-	runPath, err := fs.LocalPath(true)
+	runPath, err := fs.RootPath("")
 	if err != nil {
 		t.Fatal(err)
 	}
