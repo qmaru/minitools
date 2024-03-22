@@ -98,11 +98,7 @@ func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
 
 // Joinpath join the root path and all sub
 func (fs *FileSuiteBasic) Joinpath(root string, sub ...string) (string, error) {
-	mainRoot, err := fs.RootPath(root)
-	if err != nil {
-		return "", err
-	}
-	fullpath := append([]string{mainRoot}, sub...)
+	fullpath := append([]string{root}, sub...)
 	return filepath.Join(fullpath...), nil
 }
 
