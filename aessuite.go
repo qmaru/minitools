@@ -7,57 +7,57 @@ import (
 	"errors"
 )
 
-// AESSuiteBasic AES 套件基类
+// AESSuiteBasic
 type AESSuiteBasic struct{}
 
-// Encrypt 加密
+// Encrypt
 func (aess *AESSuiteBasic) Encrypt(plaintext []byte, key []byte, iv []byte) ([]byte, error) {
-	// 分组密钥
+	// Group key
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	// 获取秘钥块的长度
+	// key block size
 	blockSize := block.BlockSize()
-	// 填充码
+	// padding code
 	padding := blockSize - len(plaintext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	paddingData := append(plaintext, padtext...)
-	// 加密模式
+	// check iv
 	if iv == nil {
 		iv = key[:blockSize]
 	} else if len(iv) != blockSize {
 		return nil, errors.New("IV Error: IV length must equal block size")
 	}
 	blockMode := cipher.NewCBCEncrypter(block, iv)
-	// 创建加密数组
+	// create text array
 	cyphertext := make([]byte, len(paddingData))
-	// 执行加密
+	// encrypt
 	blockMode.CryptBlocks(cyphertext, paddingData)
 	return cyphertext, nil
 }
 
-// Decrypt 解密函数
+// Decrypt
 func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) ([]byte, error) {
-	// 分组秘钥
+	// Group key
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	// 获取秘钥块的长度
+	// key block size
 	blockSize := block.BlockSize()
-	// 加密模式
+	// check iv
 	if iv == nil {
 		iv = key[:blockSize]
 	} else if len(iv) != blockSize {
 		return nil, errors.New("IV Error: IV length must equal block size")
 	}
 	blockMode := cipher.NewCBCDecrypter(block, iv)
-	// 创建解密数组
+	// create text array
 	plaintext := make([]byte, len(cryted))
-	// 解密
+	// decrypt
 	blockMode.CryptBlocks(plaintext, cryted)
-	// 去码
+	// unpadding
 	length := len(plaintext)
 	unpadding := int(plaintext[length-1])
 	plaintext = plaintext[:(length - unpadding)]

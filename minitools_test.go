@@ -31,7 +31,7 @@ func TestAes(t *testing.T) {
 func TestData(t *testing.T) {
 	ds := DataSuite()
 	jsonStr := []byte(`{"name": "Alice", "age": 20}`)
-	data, err := ds.RawMap2Map(jsonStr)
+	data, err := ds.RawJson2Map(jsonStr)
 	if err != nil {
 		t.Fatal(err)
 	}

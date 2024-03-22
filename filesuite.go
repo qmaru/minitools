@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-// FileSuiteBasic 文件操作基类
+// FileSuiteBasic
 type FileSuiteBasic struct{}
 
-// Create 创建文件夹
+// Mkdir create a folder
 func (fs *FileSuiteBasic) Mkdir(folderPath string) (string, error) {
 	_, err := os.Stat(folderPath)
 	if err == nil {
@@ -27,12 +27,12 @@ func (fs *FileSuiteBasic) Mkdir(folderPath string) (string, error) {
 	return folderPath, nil
 }
 
-// Write 保存文件
+// WriteFile Write data to a file
 func (fs *FileSuiteBasic) WriteFile(f string, data []byte) error {
 	return os.WriteFile(f, data, 0666)
 }
 
-// Read 读取文件
+// ReadFile Read data from a file
 func (fs *FileSuiteBasic) ReadFile(f string) ([]byte, error) {
 	data, err := os.ReadFile(f)
 	if err != nil {
@@ -41,12 +41,12 @@ func (fs *FileSuiteBasic) ReadFile(f string) ([]byte, error) {
 	return data, nil
 }
 
-// CheckType 检查文件类型
+// CheckType check var type
 func (fs *FileSuiteBasic) CheckType(i interface{}) reflect.Type {
 	return reflect.TypeOf(i)
 }
 
-// CheckExist 检查文件是否存在
+// IsExist Check if the path exists
 func (fs *FileSuiteBasic) IsExist(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -58,13 +58,13 @@ func (fs *FileSuiteBasic) IsExist(path string) error {
 	return nil
 }
 
-// RootPath 获取当前项目根目录 main()
+// RootPath Get project root path
 //
-//	GOTMPDIR 是必须的
+//	GOTMPDIR required
 //
-//	subPath: 拼接子目录
+//	subPath: join sub path
 func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
-	// go build 可执行文件路径
+	// go build path
 	exePath, err := os.Executable()
 	if err != nil {
 		return "", err
@@ -73,7 +73,7 @@ func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
 	if err != nil {
 		return "", err
 	}
-	// go run 调试路径
+	// go run path
 	buildPath, err := filepath.EvalSymlinks(os.Getenv("GOTMPDIR"))
 	if err != nil {
 		return "", err
@@ -94,4 +94,31 @@ func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
 	fullPaths = append(fullPaths, subPath...)
 	fullPath := filepath.Join(fullPaths...)
 	return fullPath, nil
+}
+
+// Joinpath join the root path and all sub
+func (fs *FileSuiteBasic) Joinpath(root string, sub ...string) (string, error) {
+	mainRoot, err := fs.RootPath(root)
+	if err != nil {
+		return "", err
+	}
+	fullpath := append([]string{mainRoot}, sub...)
+	return filepath.Join(fullpath...), nil
+}
+
+// GetFileData get data direct
+func (fs *FileSuiteBasic) GetFileData(root string, sub ...string) ([]byte, error) {
+	fullPath, err := fs.Joinpath(root, sub...)
+	if err != nil {
+		return nil, err
+	}
+	err = fs.IsExist(fullPath)
+	if err != nil {
+		return nil, err
+	}
+	data, err := fs.ReadFile(fullPath)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
