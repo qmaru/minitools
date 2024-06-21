@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/qmaru/minitools/aes"
-	"github.com/qmaru/minitools/data"
-	"github.com/qmaru/minitools/file"
-	"github.com/qmaru/minitools/time"
+	"github.com/qmaru/minitools/v2/aes"
+	"github.com/qmaru/minitools/v2/data"
+	"github.com/qmaru/minitools/v2/file"
+	"github.com/qmaru/minitools/v2/time"
 )
 
 func TestAes(t *testing.T) {
