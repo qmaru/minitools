@@ -1,4 +1,4 @@
-package minitools
+package aes
 
 import (
 	"bytes"
@@ -62,4 +62,8 @@ func (aess *AESSuiteBasic) Decrypt(cryted []byte, key []byte, iv []byte) ([]byte
 	unpadding := int(plaintext[length-1])
 	plaintext = plaintext[:(length - unpadding)]
 	return plaintext, nil
+}
+
+func New() *AESSuiteBasic {
+	return new(AESSuiteBasic)
 }

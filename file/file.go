@@ -1,4 +1,4 @@
-package minitools
+package file
 
 import (
 	"os"
@@ -117,4 +117,8 @@ func (fs *FileSuiteBasic) GetFileData(root string, sub ...string) ([]byte, error
 		return nil, err
 	}
 	return data, nil
+}
+
+func New() *FileSuiteBasic {
+	return new(FileSuiteBasic)
 }

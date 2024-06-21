@@ -3,10 +3,15 @@ package minitools
 import (
 	"bytes"
 	"testing"
+
+	"github.com/qmaru/minitools/aes"
+	"github.com/qmaru/minitools/data"
+	"github.com/qmaru/minitools/file"
+	"github.com/qmaru/minitools/time"
 )
 
 func TestAes(t *testing.T) {
-	as := AESSuite()
+	as := aes.New()
 
 	plain := []byte("minitools")
 	key := []byte("length is 16 bit")
@@ -29,7 +34,7 @@ func TestAes(t *testing.T) {
 }
 
 func TestData(t *testing.T) {
-	ds := DataSuite()
+	ds := data.New()
 	jsonStr := []byte(`{"name": "Alice", "age": 20}`)
 	data, err := ds.RawJson2Map(jsonStr)
 	if err != nil {
@@ -39,7 +44,7 @@ func TestData(t *testing.T) {
 }
 
 func TestFile(t *testing.T) {
-	fs := FileSuite()
+	fs := file.New()
 	runPath, err := fs.RootPath("")
 	if err != nil {
 		t.Fatal(err)
@@ -48,7 +53,7 @@ func TestFile(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	ts := TimeSuite()
+	ts := time.New()
 	t1 := "2006.01.02 15:04:05"
 	t2 := "2006/01/02"
 	now := "2020.10.01 14:30:40"

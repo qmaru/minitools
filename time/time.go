@@ -1,4 +1,4 @@
-package minitools
+package time
 
 import (
 	"fmt"
@@ -78,4 +78,8 @@ func (ts *TimeSuiteBasic) RunTime() func() {
 		tc := time.Since(start)
 		fmt.Printf("Time = %v\n", tc)
 	}
+}
+
+func New() *TimeSuiteBasic {
+	return new(TimeSuiteBasic)
 }

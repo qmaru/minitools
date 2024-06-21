@@ -1,4 +1,4 @@
-package minitools
+package data
 
 import "encoding/json"
 
@@ -33,4 +33,8 @@ func (ds *DataSuiteBasic) RawArray2Array(input []byte) (output []interface{}, er
 func (ds *DataSuiteBasic) Float2uint(f float64) int64 {
 	u := int64((f * 100) + 0.5)
 	return u
+}
+
+func New() *DataSuiteBasic {
+	return new(DataSuiteBasic)
 }
