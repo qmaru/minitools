@@ -11,23 +11,41 @@ import (
 )
 
 func TestAes(t *testing.T) {
-	as := aes.New()
+	cbc := aes.NewCBC()
+	gcm := aes.NewGCM()
 
 	plain := []byte("minitools")
 	key := []byte("length is 16 bit")
 	iv := []byte("same size as key")
 
-	encData, err := as.Encrypt(plain, key, iv)
-	if err != nil {
-		t.Fatal(err)
-	}
-	decData, err := as.Decrypt(encData, key, iv)
+	encCBCData, err := cbc.Encrypt(plain, key, iv)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if bytes.Equal(decData, plain) {
-		t.Logf("\nEncrypt: %s\nDecrypt: %s", encData, decData)
+	decCBCData, err := cbc.Decrypt(encCBCData, key, iv)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	encGCMData, err := gcm.Encrypt(plain, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	decGCMData, err := gcm.Decrypt(encGCMData, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if bytes.Equal(decCBCData, plain) {
+		t.Logf("CBC:\nEncrypt: %s\nDecrypt: %s", encCBCData, decCBCData)
+	} else {
+		t.Error("Decryption failed")
+	}
+
+	if bytes.Equal(decGCMData, plain) {
+		t.Logf("GCM\nEncrypt: %s\nDecrypt: %s", encGCMData, decGCMData)
 	} else {
 		t.Error("Decryption failed")
 	}
