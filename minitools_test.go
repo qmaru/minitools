@@ -10,6 +10,7 @@ import (
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
+	"github.com/qmaru/minitools/v2/secret/xor"
 	"github.com/qmaru/minitools/v2/time"
 )
 
@@ -87,7 +88,9 @@ func TestTime(t *testing.T) {
 
 func TestHashSqids(t *testing.T) {
 	shash := sqids.New()
-	s, err := shash.New(10)
+	s, err := shash.New(sqids.SqidsOptions{
+		MinLength: 10,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,4 +110,20 @@ func TestHashNanoid(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(s)
+}
+
+func TestSecretXor(t *testing.T) {
+	data := []byte("hello world")
+	key := []byte("123456")
+
+	x := xor.New()
+	cipherData := x.Cipher(data, key)
+
+	plainData := x.Cipher(cipherData, key)
+
+	if x.ToString(plainData) == string(data) {
+		t.Logf("GCM\nEncrypt: %s\nDecrypt: %s", x.ToString(cipherData), x.ToString(plainData))
+	} else {
+		t.Error("Decryption failed")
+	}
 }
