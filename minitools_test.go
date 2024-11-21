@@ -7,6 +7,9 @@ import (
 	"github.com/qmaru/minitools/v2/aes"
 	"github.com/qmaru/minitools/v2/data"
 	"github.com/qmaru/minitools/v2/file"
+	"github.com/qmaru/minitools/v2/hashx/blake3"
+	"github.com/qmaru/minitools/v2/hashx/nanoid"
+	"github.com/qmaru/minitools/v2/hashx/sqids"
 	"github.com/qmaru/minitools/v2/time"
 )
 
@@ -80,4 +83,28 @@ func TestTime(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(data)
+}
+
+func TestHashSqids(t *testing.T) {
+	shash := sqids.New()
+	s, err := shash.New(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(s.Encode([]uint64{123456}))
+}
+
+func TestHashBlake3(t *testing.T) {
+	bhash := blake3.New()
+	s := bhash.Sum256([]byte("123456")).ToBase64()
+	t.Log(s)
+}
+
+func TestHashNanoid(t *testing.T) {
+	nhash := nanoid.New()
+	s, err := nhash.New(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(s)
 }
