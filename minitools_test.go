@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/qmaru/minitools/v2/aes"
-	"github.com/qmaru/minitools/v2/data"
+	"github.com/qmaru/minitools/v2/data/minijson"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
+	"github.com/qmaru/minitools/v2/secret/aes"
 	"github.com/qmaru/minitools/v2/secret/xor"
 	"github.com/qmaru/minitools/v2/time"
 )
@@ -43,22 +43,22 @@ func TestAes(t *testing.T) {
 	}
 
 	if bytes.Equal(decCBCData, plain) {
-		t.Logf("CBC:\nEncrypt: %s\nDecrypt: %s", encCBCData, decCBCData)
+		t.Logf("CBC:\nEncrypt: %v\nDecrypt: %s", encCBCData, decCBCData)
 	} else {
 		t.Error("Decryption failed")
 	}
 
 	if bytes.Equal(decGCMData, plain) {
-		t.Logf("GCM\nEncrypt: %s\nDecrypt: %s", encGCMData, decGCMData)
+		t.Logf("GCM\nEncrypt: %v\nDecrypt: %s", encGCMData, decGCMData)
 	} else {
 		t.Error("Decryption failed")
 	}
 }
 
-func TestData(t *testing.T) {
-	ds := data.New()
+func TestDataJson(t *testing.T) {
+	jdata := minijson.New()
 	jsonStr := []byte(`{"name": "Alice", "age": 20}`)
-	data, err := ds.RawJson2Map(jsonStr)
+	data, err := jdata.RawJson2Map(jsonStr)
 	if err != nil {
 		t.Fatal(err)
 	}

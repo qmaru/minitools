@@ -42,7 +42,7 @@ func (fs *FileSuiteBasic) ReadFile(f string) ([]byte, error) {
 }
 
 // CheckType check var type
-func (fs *FileSuiteBasic) CheckType(i interface{}) reflect.Type {
+func (fs *FileSuiteBasic) CheckType(i any) reflect.Type {
 	return reflect.TypeOf(i)
 }
 
