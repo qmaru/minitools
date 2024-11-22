@@ -1,7 +1,7 @@
 package sqids
 
 import (
-	"github.com/sqids/sqids-go"
+	gosqids "github.com/sqids/sqids-go"
 )
 
 type SqidsOptions struct {
@@ -12,8 +12,8 @@ type SqidsOptions struct {
 
 type SqidsBasic struct{}
 
-func (s *SqidsBasic) New(options SqidsOptions) (*sqids.Sqids, error) {
-	return sqids.New(sqids.Options{
+func (s *SqidsBasic) New(options SqidsOptions) (*gosqids.Sqids, error) {
+	return gosqids.New(gosqids.Options{
 		MinLength: options.MinLength,
 		Alphabet:  options.Alphabet,
 		Blocklist: options.Blocklist,
