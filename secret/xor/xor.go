@@ -8,10 +8,10 @@ import (
 type XorBasic struct{}
 
 func (x *XorBasic) Cipher(data []byte, key []byte) []byte {
-	var result []byte
+	result := make([]byte, len(data))
 	keyLen := len(key)
 	for i := 0; i < len(data); i++ {
-		result = append(result, data[i]^key[i%keyLen])
+		result[i] = data[i] ^ key[i%keyLen]
 	}
 	return result
 }
