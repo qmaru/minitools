@@ -6,6 +6,8 @@ import (
 	"github.com/qmaru/minitools/v2/data/json/common"
 )
 
+type StandardJSONBasic = common.DataJsonDefault[StandardJSON]
+
 // StandardJSON
 type StandardJSON struct{}
 
@@ -17,6 +19,6 @@ func (s StandardJSON) Unmarshal(data []byte, v interface{}) error {
 	return sjson.Unmarshal(data, v)
 }
 
-func New() *common.DataJsonDefault[StandardJSON] {
-	return new(common.DataJsonDefault[StandardJSON])
+func New() *StandardJSONBasic {
+	return new(StandardJSONBasic)
 }

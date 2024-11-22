@@ -6,6 +6,8 @@ import (
 	"github.com/qmaru/minitools/v2/data/json/common"
 )
 
+type SonicJSONBasic = common.DataJsonDefault[SonicJSON]
+
 // SonicJSON
 type SonicJSON struct{}
 
@@ -17,6 +19,6 @@ func (s SonicJSON) Unmarshal(data []byte, v interface{}) error {
 	return sjson.Unmarshal(data, v)
 }
 
-func New() *common.DataJsonDefault[SonicJSON] {
-	return new(common.DataJsonDefault[SonicJSON])
+func New() *SonicJSONBasic {
+	return new(SonicJSONBasic)
 }
