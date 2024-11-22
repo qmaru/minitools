@@ -4,7 +4,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/qmaru/minitools/v2/data/json"
+	"github.com/qmaru/minitools/v2/data/json/sonic"
+	"github.com/qmaru/minitools/v2/data/json/standard"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
@@ -18,16 +19,26 @@ func init() {
 }
 
 func BenchmarkDataJson(b *testing.B) {
-	jdata := json.New()
+	stdJ := standard.New()
+	sonicJ := sonic.New()
+
 	jsonStr := []byte(`{"id":12345,"name":"John Doe","email":"johndoe@example.com","address":{"street":"123 Main St","city":"Springfield","state":"IL","zip":"62701","country":"USA"},"phone_numbers":[{"type":"home","number":"555-1234"},{"type":"work","number":"555-5678"}],"preferences":{"newsletter":true,"notifications":false,"theme":"dark"},"purchase_history":[{"item_id":987,"item_name":"Laptop","price":1299.99,"quantity":1,"purchase_date":"2024-01-15"},{"item_id":654,"item_name":"Headphones","price":199.99,"quantity":2,"purchase_date":"2024-02-01"}],"active":true,"last_login":"2024-11-21T15:30:00Z","meta":{"created_at":"2020-05-01T10:00:00Z","updated_at":"2024-11-20T08:00:00Z","version":"1.2.3"},"friends":[{"id":67890,"name":"Jane Smith","relationship":"friend"},{"id":23456,"name":"Bob Johnson","relationship":"colleague"}]}`)
 	jsonStrLen := int64(len(jsonStr))
 
 	b.ReportAllocs()
 	b.SetBytes(jsonStrLen)
 
-	for i := 0; i < b.N; i++ {
-		jdata.RawJson2Map(jsonStr)
-	}
+	b.Run("Standard", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			stdJ.RawJson2Map(jsonStr)
+		}
+	})
+
+	b.Run("Sonic", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			sonicJ.RawJson2Map(jsonStr)
+		}
+	})
 }
 
 func BenchmarkHashBlake3(b *testing.B) {

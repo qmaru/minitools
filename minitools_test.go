@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/qmaru/minitools/v2/data/json"
+	"github.com/qmaru/minitools/v2/data/json/sonic"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
@@ -57,7 +57,7 @@ func TestAes(t *testing.T) {
 }
 
 func TestDataJson(t *testing.T) {
-	jdata := json.New()
+	jdata := sonic.New()
 	jsonStr := []byte(`{"name": "Alice", "age": 20}`)
 	data, err := jdata.RawJson2Map(jsonStr)
 	if err != nil {
