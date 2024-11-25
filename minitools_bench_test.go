@@ -13,6 +13,7 @@ import (
 	"github.com/qmaru/minitools/v2/hashx/sqids"
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
+	"github.com/qmaru/minitools/v2/secret/chacha20"
 	"github.com/qmaru/minitools/v2/secret/xor"
 )
 
@@ -74,6 +75,16 @@ func BenchmarkHashMurmur3(b *testing.B) {
 	}
 }
 
+func BenchmarkHashNanoid(b *testing.B) {
+	nhash := nanoid.New()
+
+	b.ReportAllocs()
+	b.SetBytes(21)
+	for i := 0; i < b.N; i++ {
+		nhash.New()
+	}
+}
+
 func BenchmarkHashSqids(b *testing.B) {
 	data := []uint64{123456}
 	dataLen := int64(len(data))
@@ -86,16 +97,6 @@ func BenchmarkHashSqids(b *testing.B) {
 	b.SetBytes(dataLen)
 	for i := 0; i < b.N; i++ {
 		s.Encode(data)
-	}
-}
-
-func BenchmarkHashNanoid(b *testing.B) {
-	nhash := nanoid.New()
-
-	b.ReportAllocs()
-	b.SetBytes(21)
-	for i := 0; i < b.N; i++ {
-		nhash.New()
 	}
 }
 
@@ -140,6 +141,34 @@ func BenchmarkSecretAes(b *testing.B) {
 		b.SetBytes(gcmDataLen)
 		for i := 0; i < b.N; i++ {
 			aesgcm.Decrypt(gcmData, key)
+		}
+	})
+}
+
+func BenchmarkSecretChacha20(b *testing.B) {
+	plain := []byte("minitools")
+	plainLen := int64(len(plain))
+
+	encData := []byte{17, 53, 44, 213, 99, 96, 75, 168, 10, 6, 99, 178, 26, 150, 207, 112, 40, 50, 73, 200, 125}
+	encDataLen := int64(len(encData))
+
+	key := []byte("this is a 32bit key for chacha20")
+
+	c := chacha20.New()
+
+	b.ReportAllocs()
+
+	b.Run("Encrypt", func(b *testing.B) {
+		b.SetBytes(plainLen)
+		for i := 0; i < b.N; i++ {
+			c.Encrypt(plain, key)
+		}
+	})
+
+	b.Run("Decrypt", func(b *testing.B) {
+		b.SetBytes(encDataLen)
+		for i := 0; i < b.N; i++ {
+			c.Decrypt(encData, key)
 		}
 	})
 }
