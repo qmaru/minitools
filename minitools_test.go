@@ -10,14 +10,15 @@ import (
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
-	"github.com/qmaru/minitools/v2/secret/aes"
+	"github.com/qmaru/minitools/v2/secret/aes/cbc"
+	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/xor"
 	"github.com/qmaru/minitools/v2/time"
 )
 
 func TestAes(t *testing.T) {
-	cbc := aes.NewCBC()
-	gcm := aes.NewGCM()
+	cbc := cbc.New()
+	gcm := gcm.New()
 
 	plain := []byte("minitools")
 	key := []byte("length is 16 bit")

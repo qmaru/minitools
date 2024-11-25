@@ -11,7 +11,8 @@ import (
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
-	"github.com/qmaru/minitools/v2/secret/aes"
+	"github.com/qmaru/minitools/v2/secret/aes/cbc"
+	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/xor"
 )
 
@@ -99,8 +100,8 @@ func BenchmarkHashNanoid(b *testing.B) {
 }
 
 func BenchmarkSecretAes(b *testing.B) {
-	cbc := aes.NewCBC()
-	gcm := aes.NewGCM()
+	aescbc := cbc.New()
+	aesgcm := gcm.New()
 
 	plain := []byte("minitools")
 	plainLen := int64(len(plain))
@@ -117,28 +118,28 @@ func BenchmarkSecretAes(b *testing.B) {
 	b.Run("CBCEncrypt", func(b *testing.B) {
 		b.SetBytes(plainLen)
 		for i := 0; i < b.N; i++ {
-			cbc.Encrypt(plain, key, iv)
+			aescbc.Encrypt(plain, key, iv)
 		}
 	})
 
 	b.Run("CBCDecrypt", func(b *testing.B) {
 		b.SetBytes(cbcDataLen)
 		for i := 0; i < b.N; i++ {
-			cbc.Decrypt(cbcData, key, iv)
+			aescbc.Decrypt(cbcData, key, iv)
 		}
 	})
 
 	b.Run("GCMEncrypt", func(b *testing.B) {
 		b.SetBytes(plainLen)
 		for i := 0; i < b.N; i++ {
-			gcm.Encrypt(plain, key)
+			aesgcm.Encrypt(plain, key)
 		}
 	})
 
 	b.Run("GCMDecrypt", func(b *testing.B) {
 		b.SetBytes(gcmDataLen)
 		for i := 0; i < b.N; i++ {
-			gcm.Decrypt(gcmData, key)
+			aesgcm.Decrypt(gcmData, key)
 		}
 	})
 }

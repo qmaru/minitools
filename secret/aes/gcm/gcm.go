@@ -1,4 +1,4 @@
-package aes
+package gcm
 
 import (
 	"crypto/aes"
@@ -8,7 +8,14 @@ import (
 	"io"
 )
 
-func (aess *AESSuiteGCMBasic) Encrypt(plainData, key []byte) ([]byte, error) {
+// AESGCMBasic
+type AESGCMBasic struct{}
+
+func New() *AESGCMBasic {
+	return new(AESGCMBasic)
+}
+
+func (aess *AESGCMBasic) Encrypt(plainData, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -28,7 +35,7 @@ func (aess *AESSuiteGCMBasic) Encrypt(plainData, key []byte) ([]byte, error) {
 	return cipherData, nil
 }
 
-func (aess *AESSuiteGCMBasic) Decrypt(cipherData, key []byte) ([]byte, error) {
+func (aess *AESGCMBasic) Decrypt(cipherData, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

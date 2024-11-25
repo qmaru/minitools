@@ -1,4 +1,4 @@
-package aes
+package cbc
 
 import (
 	"bytes"
@@ -7,8 +7,15 @@ import (
 	"errors"
 )
 
+// AESCBCBasic
+type AESCBCBasic struct{}
+
+func New() *AESCBCBasic {
+	return new(AESCBCBasic)
+}
+
 // Encrypt
-func (aess *AESSuiteCBCBasic) Encrypt(plainData []byte, key []byte, iv []byte) ([]byte, error) {
+func (aess *AESCBCBasic) Encrypt(plainData []byte, key []byte, iv []byte) ([]byte, error) {
 	// Group key
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -35,7 +42,7 @@ func (aess *AESSuiteCBCBasic) Encrypt(plainData []byte, key []byte, iv []byte) (
 }
 
 // Decrypt
-func (aess *AESSuiteCBCBasic) Decrypt(cypherData []byte, key []byte, iv []byte) ([]byte, error) {
+func (aess *AESCBCBasic) Decrypt(cypherData []byte, key []byte, iv []byte) ([]byte, error) {
 	// Group key
 	block, err := aes.NewCipher(key)
 	if err != nil {
