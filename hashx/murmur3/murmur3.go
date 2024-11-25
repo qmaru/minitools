@@ -9,15 +9,22 @@ import (
 )
 
 type Murmur3Basic struct {
-	data []byte
-	is32 bool
-	is64 bool
+	BigEndian bool
+	data      []byte
+	is32      bool
+	is64      bool
 }
 
 func (b *Murmur3Basic) Sum32(s []byte) *Murmur3Basic {
 	b32 := gomurmur3.Sum32(s)
 	buf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(buf, b32)
+
+	if b.BigEndian {
+		binary.BigEndian.PutUint32(buf, b32)
+	} else {
+		binary.LittleEndian.PutUint32(buf, b32)
+	}
+
 	b.data = buf
 	b.is32 = true
 	return b
@@ -26,7 +33,13 @@ func (b *Murmur3Basic) Sum32(s []byte) *Murmur3Basic {
 func (b *Murmur3Basic) Sum64(s []byte) *Murmur3Basic {
 	b64 := gomurmur3.Sum64(s)
 	buf := make([]byte, 8)
-	binary.LittleEndian.PutUint64(buf, b64)
+
+	if b.BigEndian {
+		binary.BigEndian.PutUint64(buf, b64)
+	} else {
+		binary.LittleEndian.PutUint64(buf, b64)
+	}
+
 	b.data = buf
 	b.is64 = true
 	return b
@@ -36,8 +49,15 @@ func (b *Murmur3Basic) Sum128(s []byte) *Murmur3Basic {
 	h1, h2 := gomurmur3.Sum128(s)
 	h1Byte := make([]byte, 8)
 	h2Byte := make([]byte, 8)
-	binary.LittleEndian.PutUint64(h1Byte, h1)
-	binary.LittleEndian.PutUint64(h2Byte, h2)
+
+	if b.BigEndian {
+		binary.BigEndian.PutUint64(h1Byte, h1)
+		binary.BigEndian.PutUint64(h2Byte, h2)
+	} else {
+		binary.LittleEndian.PutUint64(h1Byte, h1)
+		binary.LittleEndian.PutUint64(h2Byte, h2)
+	}
+
 	combined := append(h1Byte, h2Byte...)
 	b.data = combined
 	return b
