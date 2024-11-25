@@ -13,7 +13,7 @@ func New() *Chacha20Basic {
 	return new(Chacha20Basic)
 }
 
-func (c *Chacha20Basic) generateNonce() ([]byte, error) {
+func (c *Chacha20Basic) GenerateNonce() ([]byte, error) {
 	nonce := make([]byte, 12)
 	_, err := rand.Read(nonce)
 	if err != nil {
@@ -22,14 +22,9 @@ func (c *Chacha20Basic) generateNonce() ([]byte, error) {
 	return nonce, nil
 }
 
-func (c *Chacha20Basic) Encrypt(plainData, key []byte) ([]byte, error) {
+func (c *Chacha20Basic) Encrypt(plainData, key, nonce []byte) ([]byte, error) {
 	if len(key) != 32 {
 		return nil, errors.New("invalid key size: must 32 bytes")
-	}
-
-	nonce, err := c.generateNonce()
-	if err != nil {
-		return nil, err
 	}
 
 	cipher, err := gochacha.NewUnauthenticatedCipher(key, nonce)

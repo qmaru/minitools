@@ -110,12 +110,13 @@ func TestSecretAes(t *testing.T) {
 }
 
 func TestSecretChacha20(t *testing.T) {
-	plain := []byte("minitools")
-	key := []byte("this is a 32bit key for chacha20")
-
 	c := chacha20.New()
 
-	encData, err := c.Encrypt(plain, key)
+	plain := []byte("minitools")
+	key := []byte("this is a 32bit key for chacha20")
+	nonce, _ := c.GenerateNonce()
+
+	encData, err := c.Encrypt(plain, key, nonce)
 	if err != nil {
 		t.Fatal(err)
 	}

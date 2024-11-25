@@ -146,22 +146,23 @@ func BenchmarkSecretAes(b *testing.B) {
 }
 
 func BenchmarkSecretChacha20(b *testing.B) {
+	c := chacha20.New()
+
 	plain := []byte("minitools")
 	plainLen := int64(len(plain))
+	nonce, _ := c.GenerateNonce()
 
 	encData := []byte{17, 53, 44, 213, 99, 96, 75, 168, 10, 6, 99, 178, 26, 150, 207, 112, 40, 50, 73, 200, 125}
 	encDataLen := int64(len(encData))
 
 	key := []byte("this is a 32bit key for chacha20")
 
-	c := chacha20.New()
-
 	b.ReportAllocs()
 
 	b.Run("Encrypt", func(b *testing.B) {
 		b.SetBytes(plainLen)
 		for i := 0; i < b.N; i++ {
-			c.Encrypt(plain, key)
+			c.Encrypt(plain, key, nonce)
 		}
 	})
 
