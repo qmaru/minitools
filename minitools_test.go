@@ -20,11 +20,31 @@ import (
 func TestDataJson(t *testing.T) {
 	jdata := gojson.New()
 	jsonStr := []byte(`{"name": "Alice", "age": 20}`)
+
+	// Decoder
+	var d map[string]any
+	decoder := jdata.Json.NewDecoder(bytes.NewBuffer(jsonStr))
+	err := decoder.Decode(&d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("Decode: %v", d)
+
+	// Encoder
+	var buf bytes.Buffer
+	encoder := jdata.Json.NewEncoder(&buf)
+	err = encoder.Encode(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("Encode: %v", buf.String())
+
+	// Common method
 	data, err := jdata.RawJson2Map(jsonStr)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(data)
+	t.Logf("RawJson2Map: %v", data)
 }
 
 func TestFile(t *testing.T) {

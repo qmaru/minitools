@@ -2,6 +2,7 @@ package common
 
 type DataJsonBasic interface {
 	Marshal(v any) ([]byte, error)
+	MarshalIndent(v any, prefix, indent string) ([]byte, error)
 	Unmarshal(data []byte, v any) error
 }
 
