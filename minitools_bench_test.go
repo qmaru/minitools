@@ -1,6 +1,7 @@
 package minitools
 
 import (
+	"bytes"
 	"runtime"
 	"testing"
 
@@ -26,27 +27,57 @@ func BenchmarkDataJson(b *testing.B) {
 	sonicJ := sonic.New()
 	goJ := gojson.New()
 
-	jsonStr := []byte(`{"id":12345,"name":"John Doe","email":"johndoe@example.com","address":{"street":"123 Main St","city":"Springfield","state":"IL","zip":"62701","country":"USA"},"phone_numbers":[{"type":"home","number":"555-1234"},{"type":"work","number":"555-5678"}],"preferences":{"newsletter":true,"notifications":false,"theme":"dark"},"purchase_history":[{"item_id":987,"item_name":"Laptop","price":1299.99,"quantity":1,"purchase_date":"2024-01-15"},{"item_id":654,"item_name":"Headphones","price":199.99,"quantity":2,"purchase_date":"2024-02-01"}],"active":true,"last_login":"2024-11-21T15:30:00Z","meta":{"created_at":"2020-05-01T10:00:00Z","updated_at":"2024-11-20T08:00:00Z","version":"1.2.3"},"friends":[{"id":67890,"name":"Jane Smith","relationship":"friend"},{"id":23456,"name":"Bob Johnson","relationship":"colleague"}]}`)
+	jsonStr := `{"id":12345,"name":"John Doe","email":"johndoe@example.com","address":{"street":"123 Main St","city":"Springfield","state":"IL","zip":"62701","country":"USA"},"phone_numbers":[{"type":"home","number":"555-1234"},{"type":"work","number":"555-5678"}],"preferences":{"newsletter":true,"notifications":false,"theme":"dark"},"purchase_history":[{"item_id":987,"item_name":"Laptop","price":1299.99,"quantity":1,"purchase_date":"2024-01-15"},{"item_id":654,"item_name":"Headphones","price":199.99,"quantity":2,"purchase_date":"2024-02-01"}],"active":true,"last_login":"2024-11-21T15:30:00Z","meta":{"created_at":"2020-05-01T10:00:00Z","updated_at":"2024-11-20T08:00:00Z","version":"1.2.3"},"friends":[{"id":67890,"name":"Jane Smith","relationship":"friend"},{"id":23456,"name":"Bob Johnson","relationship":"colleague"}]}`
+	jsonByte := []byte(jsonStr)
 	jsonStrLen := int64(len(jsonStr))
 
 	b.ReportAllocs()
-	b.SetBytes(jsonStrLen)
 
-	b.Run("Standard", func(b *testing.B) {
+	b.Run("StandardDecoder", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
 		for i := 0; i < b.N; i++ {
-			stdJ.RawJson2Map(jsonStr)
+			var d map[string]any
+			stdDec := stdJ.Json.NewDecoder(bytes.NewReader(jsonByte))
+			stdDec.Decode(&d)
 		}
 	})
 
-	b.Run("GoJson", func(b *testing.B) {
+	b.Run("GoJsonDecoder", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
 		for i := 0; i < b.N; i++ {
-			goJ.RawJson2Map(jsonStr)
+			var d map[string]any
+			goDec := goJ.Json.NewDecoder(bytes.NewReader(jsonByte))
+			goDec.Decode(&d)
 		}
 	})
 
-	b.Run("Sonic", func(b *testing.B) {
+	b.Run("SonicDecoder", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
 		for i := 0; i < b.N; i++ {
-			sonicJ.RawJson2Map(jsonStr)
+			var d map[string]any
+			sonicDec := sonicJ.Json.NewDecoder(bytes.NewReader(jsonByte))
+			sonicDec.Decode(&d)
+		}
+	})
+
+	b.Run("StandardUnmarshal", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
+		for i := 0; i < b.N; i++ {
+			stdJ.RawJson2Map(jsonByte)
+		}
+	})
+
+	b.Run("GoJsonUnmarshal", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
+		for i := 0; i < b.N; i++ {
+			goJ.RawJson2Map(jsonByte)
+		}
+	})
+
+	b.Run("SonicUnmarshal", func(b *testing.B) {
+		b.SetBytes(jsonStrLen)
+		for i := 0; i < b.N; i++ {
+			sonicJ.RawJson2Map(jsonByte)
 		}
 	})
 }
