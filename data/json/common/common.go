@@ -1,8 +1,8 @@
 package common
 
 type DataJsonBasic interface {
-	Marshal(v interface{}) ([]byte, error)
-	Unmarshal(data []byte, v interface{}) error
+	Marshal(v any) ([]byte, error)
+	Unmarshal(data []byte, v any) error
 }
 
 type DataJsonDefault[T DataJsonBasic] struct {

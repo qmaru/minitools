@@ -11,11 +11,11 @@ type StandardJSONBasic = common.DataJsonDefault[StandardJSON]
 // StandardJSON
 type StandardJSON struct{}
 
-func (s StandardJSON) Marshal(v interface{}) ([]byte, error) {
+func (s StandardJSON) Marshal(v any) ([]byte, error) {
 	return sjson.Marshal(v)
 }
 
-func (s StandardJSON) Unmarshal(data []byte, v interface{}) error {
+func (s StandardJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
 }
 

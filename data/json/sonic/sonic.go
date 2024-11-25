@@ -11,11 +11,11 @@ type SonicJSONBasic = common.DataJsonDefault[SonicJSON]
 // SonicJSON
 type SonicJSON struct{}
 
-func (s SonicJSON) Marshal(v interface{}) ([]byte, error) {
+func (s SonicJSON) Marshal(v any) ([]byte, error) {
 	return sjson.Marshal(v)
 }
 
-func (s SonicJSON) Unmarshal(data []byte, v interface{}) error {
+func (s SonicJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
 }
 

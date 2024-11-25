@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/bytedance/sonic v1.12.4
+	github.com/goccy/go-json v0.10.3
 	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/sqids/sqids-go v0.4.1
