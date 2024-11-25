@@ -4,7 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
+	"errors"
 	"io"
 )
 
@@ -15,7 +15,19 @@ func New() *AESGCMBasic {
 	return new(AESGCMBasic)
 }
 
+func (aess *AESGCMBasic) checkKey(key []byte) ([]byte, error) {
+	if len(key) != 16 && len(key) != 24 && len(key) != 32 {
+		return nil, errors.New("invalid key size, must be 16 bytes, 24 bytes, 32bytes")
+	}
+	return key, nil
+}
+
 func (aess *AESGCMBasic) Encrypt(plainData, key []byte) ([]byte, error) {
+	key, err := aess.checkKey(key)
+	if err != nil {
+		return nil, err
+	}
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -36,6 +48,10 @@ func (aess *AESGCMBasic) Encrypt(plainData, key []byte) ([]byte, error) {
 }
 
 func (aess *AESGCMBasic) Decrypt(cipherData, key []byte) ([]byte, error) {
+	key, err := aess.checkKey(key)
+	if err != nil {
+		return nil, err
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -48,7 +64,7 @@ func (aess *AESGCMBasic) Decrypt(cipherData, key []byte) ([]byte, error) {
 
 	nonceSize := aesGCM.NonceSize()
 	if len(cipherData) < nonceSize {
-		return nil, fmt.Errorf("ciphertext too short")
+		return nil, errors.New("ciphertext too short")
 	}
 
 	nonce, cipherTextBytes := cipherData[:nonceSize], cipherData[nonceSize:]
