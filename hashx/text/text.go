@@ -30,3 +30,7 @@ func (t *TextBasic) HexDecode(s string) (string, error) {
 	}
 	return string(ds), nil
 }
+
+func New() *TextBasic {
+	return new(TextBasic)
+}
