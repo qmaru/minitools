@@ -33,6 +33,10 @@ func (s SonicJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
 }
 
+func (s SonicJSON) Valid(data []byte) bool {
+	return sjson.Valid(data)
+}
+
 func New() *SonicJSONBasic {
 	return new(SonicJSONBasic)
 }

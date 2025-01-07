@@ -33,6 +33,10 @@ func (s StandardJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
 }
 
+func (s StandardJSON) Valid(data []byte) bool {
+	return sjson.Valid(data)
+}
+
 func New() *StandardJSONBasic {
 	return new(StandardJSONBasic)
 }

@@ -33,6 +33,10 @@ func (s GoJSON) Unmarshal(data []byte, v any) error {
 	return gojson.Unmarshal(data, v)
 }
 
+func (s GoJSON) Valid(data []byte) bool {
+	return gojson.Valid(data)
+}
+
 func New() *GoJSONBasic {
 	return new(GoJSONBasic)
 }
