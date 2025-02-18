@@ -73,13 +73,20 @@ func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
 	if err != nil {
 		return "", err
 	}
+
 	// go run path
 	buildPath, err := filepath.EvalSymlinks(os.Getenv("GOTMPDIR"))
 	if err != nil {
 		return "", err
 	}
 
-	if strings.Contains(runPath, buildPath) {
+	// go run cache (go1.24)
+	cachePath, err := filepath.EvalSymlinks(os.Getenv("GOCACHE"))
+	if err != nil {
+		return "", err
+	}
+
+	if strings.Contains(runPath, buildPath) || strings.Contains(runPath, cachePath) {
 		var absPath string
 		_, filename, _, ok := runtime.Caller(1)
 		if ok {
