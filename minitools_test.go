@@ -108,6 +108,19 @@ func TestHashText(t *testing.T) {
 	b64r := b64ding.DecodeRaw()
 	t.Logf("b64r: %v\n", b64r)
 
+	// base62
+	b62e := thash.Base62Encode([]byte(s))
+	t.Logf("b62e: %s\n", b62e)
+
+	b62ding, err := thash.Base62Decoding(b62e)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b62s := b62ding.DecodeString()
+	t.Logf("b62s: %v\n", b62s)
+	b62r := b62ding.DecodeRaw()
+	t.Logf("b62r: %v\n", b62r)
+
 	// hex
 	hexe := thash.HexEncode([]byte(s))
 	t.Logf("hexe: %s\n", hexe)
@@ -128,6 +141,8 @@ func TestHashText(t *testing.T) {
 	}
 	nonceB64 := thash.Base64Encode(n)
 	t.Logf("nonceB64: %v\n", nonceB64)
+	nonceB62 := thash.Base62Encode(n)
+	t.Logf("nonceB62: %v\n", nonceB62)
 	nonceHex := thash.HexEncode(n)
 	t.Logf("nonceHex: %v\n", nonceHex)
 }
