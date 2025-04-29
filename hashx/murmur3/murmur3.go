@@ -25,9 +25,7 @@ func (b *Murmur3Basic) Sum32(s []byte) *Murmur3Basic {
 		binary.LittleEndian.PutUint32(buf, b32)
 	}
 
-	b.data = buf
-	b.is32 = true
-	return b
+	return &Murmur3Basic{data: buf, is32: true}
 }
 
 func (b *Murmur3Basic) Sum64(s []byte) *Murmur3Basic {
@@ -40,9 +38,7 @@ func (b *Murmur3Basic) Sum64(s []byte) *Murmur3Basic {
 		binary.LittleEndian.PutUint64(buf, b64)
 	}
 
-	b.data = buf
-	b.is64 = true
-	return b
+	return &Murmur3Basic{data: buf, is64: true}
 }
 
 func (b *Murmur3Basic) Sum128(s []byte) *Murmur3Basic {
@@ -59,8 +55,7 @@ func (b *Murmur3Basic) Sum128(s []byte) *Murmur3Basic {
 	}
 
 	combined := append(h1Byte, h2Byte...)
-	b.data = combined
-	return b
+	return &Murmur3Basic{data: combined}
 }
 
 func (b *Murmur3Basic) ToUint32() uint32 {

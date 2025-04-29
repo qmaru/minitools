@@ -13,14 +13,12 @@ type Blake3Basic struct {
 
 func (b *Blake3Basic) Sum256(s []byte) *Blake3Basic {
 	b32 := goblake3.Sum256(s)
-	b.data = b32[:]
-	return b
+	return &Blake3Basic{data: b32[:]}
 }
 
 func (b *Blake3Basic) Sum512(s []byte) *Blake3Basic {
 	b64 := goblake3.Sum512(s)
-	b.data = b64[:]
-	return b
+	return &Blake3Basic{data: b64[:]}
 }
 
 func (b *Blake3Basic) ToBase64() string {

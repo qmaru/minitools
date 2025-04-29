@@ -19,8 +19,7 @@ func (t *TextBasic) Base64Decoding(s string) (*TextBasic, error) {
 	if err != nil {
 		return nil, err
 	}
-	t.data = ds
-	return t, nil
+	return &TextBasic{data: ds}, nil
 }
 
 func (t *TextBasic) HexEncode(s []byte) string {
@@ -33,7 +32,7 @@ func (t *TextBasic) HexDecoding(s string) (*TextBasic, error) {
 		return nil, err
 	}
 	t.data = ds
-	return t, nil
+	return &TextBasic{data: ds}, nil
 }
 
 func (t *TextBasic) Nonce(l int) ([]byte, error) {
