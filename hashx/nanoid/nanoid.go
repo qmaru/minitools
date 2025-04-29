@@ -7,7 +7,7 @@ import (
 type NanoidBasic struct{}
 
 func (s *NanoidBasic) New(l ...int) (string, error) {
-	return gonanoid.New()
+	return gonanoid.New(l...)
 }
 
 func (s *NanoidBasic) Generate(alphabet string, size int) (string, error) {
