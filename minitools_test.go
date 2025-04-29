@@ -10,6 +10,7 @@ import (
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
+	"github.com/qmaru/minitools/v2/hashx/text"
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/chacha20"
@@ -86,6 +87,49 @@ func TestHashSqids(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(s.Encode([]uint64{123456}))
+}
+
+func TestHashText(t *testing.T) {
+	thash := text.New()
+	s := "123456"
+
+	t.Logf("raw: %s\n", s)
+
+	// base64
+	b64e := thash.Base64Encode([]byte(s))
+	t.Logf("b64e: %s\n", b64e)
+
+	b64ding, err := thash.Base64Decoding(b64e)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b64s := b64ding.DecodeString()
+	t.Logf("b64s: %v\n", b64s)
+	b64r := b64ding.DecodeRaw()
+	t.Logf("b64r: %v\n", b64r)
+
+	// hex
+	hexe := thash.HexEncode([]byte(s))
+	t.Logf("hexe: %s\n", hexe)
+
+	hexding, err := thash.HexDecoding(hexe)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hexs := hexding.DecodeString()
+	t.Logf("hexs: %v\n", hexs)
+	hexr := hexding.DecodeRaw()
+	t.Logf("hexr: %v\n", hexr)
+
+	// Nonce
+	n, err := thash.Nonce(16)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nonceB64 := thash.Base64Encode(n)
+	t.Logf("nonceB64: %v\n", nonceB64)
+	nonceHex := thash.HexEncode(n)
+	t.Logf("nonceHex: %v\n", nonceHex)
 }
 
 func TestSecretAes(t *testing.T) {

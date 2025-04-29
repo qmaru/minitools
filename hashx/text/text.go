@@ -1,34 +1,56 @@
 package text
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 )
 
-type TextBasic struct{}
+type TextBasic struct {
+	data []byte
+}
 
 func (t *TextBasic) Base64Encode(s []byte) string {
 	return base64.StdEncoding.EncodeToString(s)
 }
 
-func (t *TextBasic) Base64Decode(s string) (string, error) {
+func (t *TextBasic) Base64Decoding(s string) (*TextBasic, error) {
 	ds, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(ds), nil
+	t.data = ds
+	return t, nil
 }
 
 func (t *TextBasic) HexEncode(s []byte) string {
 	return hex.EncodeToString(s)
 }
 
-func (t *TextBasic) HexDecode(s string) (string, error) {
+func (t *TextBasic) HexDecoding(s string) (*TextBasic, error) {
 	ds, err := hex.DecodeString(s)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(ds), nil
+	t.data = ds
+	return t, nil
+}
+
+func (t *TextBasic) Nonce(l int) ([]byte, error) {
+	b := make([]byte, l)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func (t *TextBasic) DecodeRaw() []byte {
+	return t.data
+}
+
+func (t *TextBasic) DecodeString() string {
+	return string(t.data)
 }
 
 func New() *TextBasic {
