@@ -233,7 +233,7 @@ func TestTime(t *testing.T) {
 	t1 := "2006.01.02 15:04:05"
 	t2 := "2006/01/02"
 	now := "2020.10.01 14:30:40"
-	data, err := ts.AnyFormat(t1, t2, now)
+	data, err := ts.ConvertFormat(t1, t2, now)
 	if err != nil {
 		t.Fatal(err)
 	}
