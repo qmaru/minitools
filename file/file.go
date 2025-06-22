@@ -1,9 +1,9 @@
 package file
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strings"
 )
@@ -11,51 +11,47 @@ import (
 // FileSuiteBasic
 type FileSuiteBasic struct{}
 
+func New() *FileSuiteBasic {
+	return new(FileSuiteBasic)
+}
+
 // Mkdir create a folder
 func (fs *FileSuiteBasic) Mkdir(folderPath string) (string, error) {
-	_, err := os.Stat(folderPath)
-	if err == nil {
-		return folderPath, nil
-	}
-	if os.IsNotExist(err) {
-		err = os.Mkdir(folderPath, os.ModePerm)
-		if err != nil {
-			return "", err
-		}
-		return folderPath, nil
+	if err := os.MkdirAll(folderPath, 0755); err != nil {
+		return "", err
 	}
 	return folderPath, nil
 }
 
 // WriteFile Write data to a file
-func (fs *FileSuiteBasic) WriteFile(f string, data []byte) error {
-	return os.WriteFile(f, data, 0666)
+func (fs *FileSuiteBasic) WriteFile(path string, data []byte) error {
+	const fileMode = 0644
+	return os.WriteFile(path, data, fileMode)
 }
 
 // ReadFile Read data from a file
 func (fs *FileSuiteBasic) ReadFile(f string) ([]byte, error) {
-	data, err := os.ReadFile(f)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-// CheckType check var type
-func (fs *FileSuiteBasic) CheckType(i any) reflect.Type {
-	return reflect.TypeOf(i)
+	return os.ReadFile(f)
 }
 
 // IsExist Check if the path exists
-func (fs *FileSuiteBasic) IsExist(path string) error {
+func (fs *FileSuiteBasic) Exists(path string) bool {
 	_, err := os.Stat(path)
-	if err != nil {
-		if os.IsExist(err) {
-			return nil
-		}
-		return err
+	return err == nil || os.IsExist(err)
+}
+
+// Joinpath join the root path and all sub
+func (fs *FileSuiteBasic) JoinPath(root string, elems ...string) string {
+	return filepath.Join(append([]string{root}, elems...)...)
+}
+
+// GetFileData get data direct
+func (fs *FileSuiteBasic) ReadFileAt(root string, elems ...string) ([]byte, error) {
+	path := fs.JoinPath(root, elems...)
+	if !fs.Exists(path) {
+		return nil, fmt.Errorf("file not found: %s", path)
 	}
-	return nil
+	return os.ReadFile(path)
 }
 
 // RootPath Get project root path
@@ -101,31 +97,4 @@ func (fs *FileSuiteBasic) RootPath(subPath ...string) (path string, err error) {
 	fullPaths = append(fullPaths, subPath...)
 	fullPath := filepath.Join(fullPaths...)
 	return fullPath, nil
-}
-
-// Joinpath join the root path and all sub
-func (fs *FileSuiteBasic) Joinpath(root string, sub ...string) (string, error) {
-	fullpath := append([]string{root}, sub...)
-	return filepath.Join(fullpath...), nil
-}
-
-// GetFileData get data direct
-func (fs *FileSuiteBasic) GetFileData(root string, sub ...string) ([]byte, error) {
-	fullPath, err := fs.Joinpath(root, sub...)
-	if err != nil {
-		return nil, err
-	}
-	err = fs.IsExist(fullPath)
-	if err != nil {
-		return nil, err
-	}
-	data, err := fs.ReadFile(fullPath)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-func New() *FileSuiteBasic {
-	return new(FileSuiteBasic)
 }
