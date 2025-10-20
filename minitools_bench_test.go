@@ -88,10 +88,40 @@ func BenchmarkHashBlake3(b *testing.B) {
 	bhash := blake3.New()
 
 	b.ReportAllocs()
-	b.SetBytes(dataLen)
-	for i := 0; i < b.N; i++ {
-		bhash.Sum256(data)
-	}
+
+	b.Run("Sum256", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			bhash.Sum256(data)
+		}
+	})
+
+	b.Run("Sum512", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			bhash.Sum512(data)
+		}
+	})
+
+	b.Run("StreamSum256", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			h := blake3.New()
+			h.SetSize(32)
+			h.Write(data)
+			h.SumStream()
+		}
+	})
+
+	b.Run("StreamSum512", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			h := blake3.New()
+			h.SetSize(64)
+			h.Write(data)
+			h.SumStream()
+		}
+	})
 }
 
 func BenchmarkHashMurmur3(b *testing.B) {
