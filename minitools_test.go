@@ -7,8 +7,11 @@ import (
 	"github.com/qmaru/minitools/v2/data/json/gojson"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
+	"github.com/qmaru/minitools/v2/hashx/md5"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
+	"github.com/qmaru/minitools/v2/hashx/sha256"
+	"github.com/qmaru/minitools/v2/hashx/sha512"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
 	"github.com/qmaru/minitools/v2/hashx/text"
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
@@ -60,6 +63,24 @@ func TestFile(t *testing.T) {
 func TestHashBlake3(t *testing.T) {
 	bhash := blake3.New()
 	s := bhash.Sum256([]byte("123456")).ToBase64()
+	t.Log(s)
+}
+
+func TestHashMD5(t *testing.T) {
+	mhash := md5.New()
+	s := mhash.Sum([]byte("123456")).ToBase64()
+	t.Log(s)
+}
+
+func TestHashSha256(t *testing.T) {
+	shash := sha256.New()
+	s := shash.Sum256([]byte("123456")).ToBase64()
+	t.Log(s)
+}
+
+func TestHashSha512(t *testing.T) {
+	shash := sha512.New()
+	s := shash.Sum512([]byte("123456")).ToBase64()
 	t.Log(s)
 }
 

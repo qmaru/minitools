@@ -9,8 +9,11 @@ import (
 	"github.com/qmaru/minitools/v2/data/json/sonic"
 	"github.com/qmaru/minitools/v2/data/json/standard"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
+	"github.com/qmaru/minitools/v2/hashx/md5"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
 	"github.com/qmaru/minitools/v2/hashx/nanoid"
+	"github.com/qmaru/minitools/v2/hashx/sha256"
+	"github.com/qmaru/minitools/v2/hashx/sha512"
 	"github.com/qmaru/minitools/v2/hashx/sqids"
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
@@ -120,6 +123,78 @@ func BenchmarkHashBlake3(b *testing.B) {
 			h.SetSize(64)
 			h.Write(data)
 			h.SumStream()
+		}
+	})
+}
+
+func BenchmarkHashMD5(b *testing.B) {
+	data := []byte("key=helloworld!!")
+	dataLen := int64(len(data))
+	mhash := md5.New()
+
+	b.ReportAllocs()
+
+	b.Run("Sum", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			mhash.Sum(data)
+		}
+	})
+
+	b.Run("StreamSum", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			h := md5.New()
+			h.Write(data)
+			h.SumStream()
+		}
+	})
+}
+
+func BenchmarkHashSha256(b *testing.B) {
+	data := []byte("key=helloworld!!")
+	dataLen := int64(len(data))
+	shash := sha256.New()
+
+	b.ReportAllocs()
+
+	b.Run("Sum256", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			shash.Sum256(data)
+		}
+	})
+
+	b.Run("StreamSum256", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			shash := sha256.New()
+			shash.Write(data)
+			shash.SumStream()
+		}
+	})
+}
+
+func BenchmarkHashSha512(b *testing.B) {
+	data := []byte("key=helloworld!!")
+	dataLen := int64(len(data))
+	shash := sha512.New()
+
+	b.ReportAllocs()
+
+	b.Run("Sum512", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			shash.Sum512(data)
+		}
+	})
+
+	b.Run("StreamSum512", func(b *testing.B) {
+		b.SetBytes(dataLen)
+		for i := 0; i < b.N; i++ {
+			shash := sha512.New()
+			shash.Write(data)
+			shash.SumStream()
 		}
 	})
 }
