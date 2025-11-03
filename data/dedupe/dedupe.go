@@ -9,9 +9,9 @@ import (
 
 type HashFunc func(parts ...any) string
 
-type Option[T any] func(*SF[T])
+type Option[T any] func(*DedupeBasic[T])
 
-type SF[T any] struct {
+type DedupeBasic[T any] struct {
 	group    *singleflight.Group
 	hashFunc HashFunc
 }
@@ -30,47 +30,47 @@ func defaultHashKey(parts ...any) string {
 	return fmt.Sprintf("%x", h.Sum64())
 }
 
-func NewT[T any](opts ...Option[T]) *SF[T] {
-	sf := &SF[T]{
+func NewT[T any](opts ...Option[T]) *DedupeBasic[T] {
+	dp := &DedupeBasic[T]{
 		group:    &singleflight.Group{},
 		hashFunc: defaultHashKey,
 	}
 	for _, opt := range opts {
-		opt(sf)
+		opt(dp)
 	}
-	return sf
+	return dp
 }
 
-func New(opts ...Option[any]) *SF[any] {
+func New(opts ...Option[any]) *DedupeBasic[any] {
 	return NewT(opts...)
 }
 
 func WithHash[T any](hashFunc HashFunc) Option[T] {
-	return func(s *SF[T]) {
+	return func(s *DedupeBasic[T]) {
 		if hashFunc != nil {
 			s.hashFunc = hashFunc
 		}
 	}
 }
 
-func (s *SF[T]) HashKey(parts ...any) string {
+func (s *DedupeBasic[T]) HashKey(parts ...any) string {
 	return s.hashFunc(parts...)
 }
 
-func (s *SF[T]) Forget(key string) {
+func (s *DedupeBasic[T]) Forget(key string) {
 	s.group.Forget(key)
 }
 
-func (s *SF[T]) Do(key string, fn func() (any, error)) (any, error) {
+func (s *DedupeBasic[T]) Do(key string, fn func() (any, error)) (any, error) {
 	v, err, _ := s.group.Do(key, fn)
 	return v, err
 }
 
-func (s *SF[T]) DoChan(key string, fn func() (any, error)) <-chan singleflight.Result {
+func (s *DedupeBasic[T]) DoChan(key string, fn func() (any, error)) <-chan singleflight.Result {
 	return s.group.DoChan(key, fn)
 }
 
-func (s *SF[T]) DoT(key string, fn func() (T, error)) (T, error) {
+func (s *DedupeBasic[T]) DoT(key string, fn func() (T, error)) (T, error) {
 	v, err, _ := s.group.Do(key, func() (any, error) {
 		return fn()
 	})
@@ -90,7 +90,7 @@ func (s *SF[T]) DoT(key string, fn func() (T, error)) (T, error) {
 	return result, nil
 }
 
-func (s *SF[T]) DoChanT(key string, fn func() (T, error)) <-chan TResult[T] {
+func (s *DedupeBasic[T]) DoChanT(key string, fn func() (T, error)) <-chan TResult[T] {
 	ch := make(chan TResult[T], 1)
 	go func() {
 		defer close(ch)
