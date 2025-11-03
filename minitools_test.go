@@ -2,8 +2,12 @@ package minitools
 
 import (
 	"bytes"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
+	"github.com/qmaru/minitools/v2/data/dedupe"
 	"github.com/qmaru/minitools/v2/data/json/gojson"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
@@ -18,8 +22,42 @@ import (
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/chacha20"
 	"github.com/qmaru/minitools/v2/secret/xor"
-	"github.com/qmaru/minitools/v2/time"
+	qtime "github.com/qmaru/minitools/v2/time"
 )
+
+func TestDedupe(t *testing.T) {
+	var deduper = dedupe.New()
+	var callCount int32
+
+	fn := func() (any, error) {
+		time.Sleep(100 * time.Millisecond)
+		atomic.AddInt32(&callCount, 1)
+		return "ok", nil
+	}
+
+	const goroutines = 10
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		go func() {
+			defer wg.Done()
+			res, err := deduper.Do("test_key", fn)
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+			if res != "ok" {
+				t.Errorf("unexpected result: %v", res)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	if atomic.LoadInt32(&callCount) != 1 {
+		t.Errorf("expected callCount=1, got %d", atomic.LoadInt32(&callCount))
+	}
+}
 
 func TestDataJson(t *testing.T) {
 	jdata := gojson.New()
@@ -250,7 +288,7 @@ func TestSecretXor(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	ts := time.New()
+	ts := qtime.New()
 	t1 := "2006.01.02 15:04:05"
 	t2 := "2006/01/02"
 	now := "2020.10.01 14:30:40"
