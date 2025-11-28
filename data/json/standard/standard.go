@@ -24,6 +24,12 @@ func (s StandardJSON) NewEncoder(w io.Writer) *sjson.Encoder {
 	return sjson.NewEncoder(w)
 }
 
+func (s StandardJSON) NewDecoderWithNumber(r io.Reader) *sjson.Decoder {
+	dec := sjson.NewDecoder(r)
+	dec.UseNumber()
+	return dec
+}
+
 func (s StandardJSON) Marshal(v any) ([]byte, error) {
 	return sjson.Marshal(v)
 }
@@ -34,6 +40,12 @@ func (s StandardJSON) MarshalIndent(v any, prefix, indent string) ([]byte, error
 
 func (s StandardJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
+}
+
+func (s StandardJSON) UnmarshalNumber(data []byte, v any) error {
+	dec := sjson.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	return dec.Decode(v)
 }
 
 func (s StandardJSON) Valid(data []byte) bool {

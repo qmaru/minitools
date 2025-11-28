@@ -24,6 +24,12 @@ func (s GoJSON) NewEncoder(w io.Writer) *gojson.Encoder {
 	return gojson.NewEncoder(w)
 }
 
+func (s GoJSON) NewDecoderWithNumber(r io.Reader) *gojson.Decoder {
+	dec := gojson.NewDecoder(r)
+	dec.UseNumber()
+	return dec
+}
+
 func (s GoJSON) Marshal(v any) ([]byte, error) {
 	return gojson.Marshal(v)
 }
@@ -34,6 +40,12 @@ func (s GoJSON) MarshalIndent(v any, prefix, indent string) ([]byte, error) {
 
 func (s GoJSON) Unmarshal(data []byte, v any) error {
 	return gojson.Unmarshal(data, v)
+}
+
+func (s GoJSON) UnmarshalNumber(data []byte, v any) error {
+	dec := gojson.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	return dec.Decode(v)
 }
 
 func (s GoJSON) Valid(data []byte) bool {

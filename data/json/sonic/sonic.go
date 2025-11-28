@@ -30,6 +30,12 @@ func (s SonicJSON) NewEncoder(w io.Writer) sjson.Encoder {
 	return sjson.ConfigDefault.NewEncoder(w)
 }
 
+func (s SonicJSON) NewDecoderWithNumber(r io.Reader) sjson.Decoder {
+	dec := sjson.ConfigDefault.NewDecoder(r)
+	dec.UseNumber()
+	return dec
+}
+
 func (s SonicJSON) Marshal(v any) ([]byte, error) {
 	return sjson.Marshal(v)
 }
@@ -40,6 +46,12 @@ func (s SonicJSON) MarshalIndent(v any, prefix, indent string) ([]byte, error) {
 
 func (s SonicJSON) Unmarshal(data []byte, v any) error {
 	return sjson.Unmarshal(data, v)
+}
+
+func (s SonicJSON) UnmarshalNumber(data []byte, v any) error {
+	dec := sjson.ConfigDefault.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	return dec.Decode(v)
 }
 
 func (s SonicJSON) Valid(data []byte) bool {
