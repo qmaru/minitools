@@ -1,12 +1,15 @@
 package standard
 
 import (
+	"bytes"
 	"io"
 
 	sjson "encoding/json"
 
 	"github.com/qmaru/minitools/v2/data/json/common"
 )
+
+type RawMessage = sjson.RawMessage
 
 type StandardJSONBasic = common.DataJsonDefault[StandardJSON]
 
@@ -35,6 +38,14 @@ func (s StandardJSON) Unmarshal(data []byte, v any) error {
 
 func (s StandardJSON) Valid(data []byte) bool {
 	return sjson.Valid(data)
+}
+
+func (s StandardJSON) Compact(dst *bytes.Buffer, src []byte) error {
+	return sjson.Compact(dst, src)
+}
+
+func (s StandardJSON) Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
+	return sjson.Indent(dst, src, prefix, indent)
 }
 
 func New() *StandardJSONBasic {

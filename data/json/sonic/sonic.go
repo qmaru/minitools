@@ -1,6 +1,7 @@
 package sonic
 
 import (
+	"bytes"
 	"io"
 
 	sjson "github.com/bytedance/sonic"
@@ -8,7 +9,15 @@ import (
 	"github.com/qmaru/minitools/v2/data/json/common"
 )
 
+type RawMessage = sjson.NoCopyRawMessage
+
 type SonicJSONBasic = common.DataJsonDefault[SonicJSON]
+
+var (
+	ConfigStd     = sjson.ConfigStd
+	ConfigDefault = sjson.ConfigDefault
+	ConfigFastest = sjson.ConfigFastest
+)
 
 // SonicJSON
 type SonicJSON struct{}
@@ -35,6 +44,38 @@ func (s SonicJSON) Unmarshal(data []byte, v any) error {
 
 func (s SonicJSON) Valid(data []byte) bool {
 	return sjson.Valid(data)
+}
+
+func (s SonicJSON) Compact(dst *bytes.Buffer, src []byte) error {
+	var v any
+	if err := ConfigStd.Unmarshal(src, &v); err != nil {
+		return err
+	}
+
+	dst.Grow(len(src))
+	data, err := ConfigStd.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	dst.Write(data)
+	return nil
+}
+
+func (s SonicJSON) Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
+	var v any
+	if err := ConfigStd.Unmarshal(src, &v); err != nil {
+		return err
+	}
+
+	dst.Grow(2 * len(src))
+	data, err := ConfigStd.MarshalIndent(v, prefix, indent)
+	if err != nil {
+		return err
+	}
+
+	_, err = dst.Write(data)
+	return err
 }
 
 func New() *SonicJSONBasic {

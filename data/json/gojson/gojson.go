@@ -1,12 +1,15 @@
 package gojson
 
 import (
+	"bytes"
 	"io"
 
 	gojson "github.com/goccy/go-json"
 
 	"github.com/qmaru/minitools/v2/data/json/common"
 )
+
+type RawMessage = gojson.RawMessage
 
 type GoJSONBasic = common.DataJsonDefault[GoJSON]
 
@@ -35,6 +38,14 @@ func (s GoJSON) Unmarshal(data []byte, v any) error {
 
 func (s GoJSON) Valid(data []byte) bool {
 	return gojson.Valid(data)
+}
+
+func (s GoJSON) Compact(dst *bytes.Buffer, src []byte) error {
+	return gojson.Compact(dst, src)
+}
+
+func (s GoJSON) Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
+	return gojson.Indent(dst, src, prefix, indent)
 }
 
 func New() *GoJSONBasic {
