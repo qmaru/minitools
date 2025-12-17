@@ -25,11 +25,11 @@ func (x *XorBasic) ToByte(secret string) []byte {
 }
 
 func (x *XorBasic) ToBase64(secret []byte) string {
-	return base64.StdEncoding.EncodeToString(secret)
+	return base64.RawURLEncoding.EncodeToString(secret)
 }
 
 func (x *XorBasic) FromBase64(b64 string) ([]byte, error) {
-	decoded, err := base64.StdEncoding.DecodeString(b64)
+	decoded, err := base64.RawURLEncoding.DecodeString(b64)
 	if err != nil {
 		return nil, err
 	}
