@@ -78,11 +78,7 @@ func TestUUID(t *testing.T) {
 	t.Logf("UUID v4: %s", u4)
 
 	// Version 5
-	option := &uuid.Option{
-		Namespace: []byte("this is a 16 bit"),
-		Name:      "example.com",
-	}
-	u5, err := uuidSuite.Generate(uuid.Version5, option)
+	u5, err := uuidSuite.Generate(uuid.Version5, uuid.WithName("example.com"),uuid.WithNamespaceBytes([]byte("this is a 16 bit")))
 	if err != nil {
 		t.Fatal(err)
 	}
