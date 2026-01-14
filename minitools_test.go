@@ -78,12 +78,8 @@ func TestUUID(t *testing.T) {
 	t.Logf("UUID v4: %s", u4)
 
 	// Version 5
-	namespace, err := uuidSuite.SetNamespace([]byte("this is a 16 bit")) // DNS namespace
-	if err != nil {
-		t.Fatal(err)
-	}
 	option := &uuid.Option{
-		Namespace: namespace,
+		Namespace: []byte("this is a 16 bit"),
 		Name:      "example.com",
 	}
 	u5, err := uuidSuite.Generate(uuid.Version5, option)

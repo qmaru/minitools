@@ -6,14 +6,14 @@ import (
 	gouuid "github.com/gofrs/uuid/v5"
 )
 
-type UUIDSuiteBasic struct{}
+type UUIDBasic struct{}
 
 type Option struct {
-	Namespace gouuid.UUID
+	Namespace []byte
 	Name      string
 }
 
-type Version int
+type Version uint
 
 const (
 	Version1 Version = iota + 1
@@ -22,15 +22,18 @@ const (
 	Version7
 )
 
-func New() *UUIDSuiteBasic {
-	return new(UUIDSuiteBasic)
+func New() *UUIDBasic {
+	return new(UUIDBasic)
 }
 
-func (u *UUIDSuiteBasic) SetNamespace(keywrod []byte) (gouuid.UUID, error) {
+func (u *UUIDBasic) setNamespace(keywrod []byte) (gouuid.UUID, error) {
+	if len(keywrod) != 16 {
+		return gouuid.Nil, errors.New("invalid namespace length")
+	}
 	return gouuid.FromBytes(keywrod)
 }
 
-func (u *UUIDSuiteBasic) Generate(version Version, option *Option) (string, error) {
+func (u *UUIDBasic) Generate(version Version, option *Option) (string, error) {
 	var uid gouuid.UUID
 	var err error
 
@@ -43,10 +46,16 @@ func (u *UUIDSuiteBasic) Generate(version Version, option *Option) (string, erro
 		if option == nil {
 			return "", errors.New("option required for v5")
 		}
-		if option.Namespace == gouuid.Nil {
+		if len(option.Namespace) != 16 {
 			return "", errors.New("invalid namespace for v5")
 		}
-		uid = gouuid.NewV5(option.Namespace, option.Name)
+
+		name := option.Name
+		namespace, err := u.setNamespace(option.Namespace)
+		if err != nil {
+			return "", err
+		}
+		uid = gouuid.NewV5(namespace, name)
 	case Version7:
 		uid, err = gouuid.NewV7()
 	default:
