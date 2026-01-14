@@ -9,6 +9,7 @@ import (
 
 	"github.com/qmaru/minitools/v2/data/dedupe"
 	"github.com/qmaru/minitools/v2/data/json/gojson"
+	"github.com/qmaru/minitools/v2/data/uuid"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/md5"
@@ -57,6 +58,46 @@ func TestDedupe(t *testing.T) {
 	if atomic.LoadInt32(&callCount) != 1 {
 		t.Errorf("expected callCount=1, got %d", atomic.LoadInt32(&callCount))
 	}
+}
+
+func TestUUID(t *testing.T) {
+	uuidSuite := uuid.New()
+
+	// Version 1
+	u1, err := uuidSuite.Generate(uuid.Version1, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("UUID v1: %s", u1)
+
+	// Version 4
+	u4, err := uuidSuite.Generate(uuid.Version4, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("UUID v4: %s", u4)
+
+	// Version 5
+	namespace, err := uuidSuite.SetNamespace([]byte("this is a 16 bit")) // DNS namespace
+	if err != nil {
+		t.Fatal(err)
+	}
+	option := &uuid.Option{
+		Namespace: namespace,
+		Name:      "example.com",
+	}
+	u5, err := uuidSuite.Generate(uuid.Version5, option)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("UUID v5: %s", u5)
+
+	// Version 7
+	u7, err := uuidSuite.Generate(uuid.Version7, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("UUID v7: %s", u7)
 }
 
 func TestDataJson(t *testing.T) {

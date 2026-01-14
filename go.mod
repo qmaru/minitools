@@ -5,6 +5,7 @@ go 1.25
 require (
 	github.com/bytedance/sonic v1.14.2
 	github.com/goccy/go-json v0.10.5
+	github.com/gofrs/uuid/v5 v5.4.0
 	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/sqids/sqids-go v0.4.1
