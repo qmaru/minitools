@@ -85,6 +85,10 @@ func (b *Blake3Basic) ToBase64() string {
 	return base64.StdEncoding.EncodeToString(b.data)
 }
 
+func (s *Blake3Basic) Bytes() []byte {
+	return s.data
+}
+
 func (b *Blake3Basic) ToHex() string {
 	return hex.EncodeToString(b.data)
 }

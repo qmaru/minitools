@@ -85,6 +85,10 @@ func (s *SHA2Basic) ToHex() string {
 	return hex.EncodeToString(s.data)
 }
 
+func (s *SHA2Basic) Bytes() []byte {
+	return s.data
+}
+
 func New() *SHA2Basic {
 	return &SHA2Basic{variant: 256}
 }

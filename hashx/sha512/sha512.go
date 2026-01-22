@@ -81,6 +81,10 @@ func (s *SHA512Basic) ToBase64() string {
 	return base64.StdEncoding.EncodeToString(s.data)
 }
 
+func (s *SHA512Basic) Bytes() []byte {
+	return s.data
+}
+
 func (s *SHA512Basic) ToHex() string {
 	return hex.EncodeToString(s.data)
 }

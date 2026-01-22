@@ -52,6 +52,10 @@ func (m *MD5Basic) ToBase64() string {
 	return base64.StdEncoding.EncodeToString(m.data)
 }
 
+func (s *MD5Basic) Bytes() []byte {
+	return s.data
+}
+
 func (m *MD5Basic) ToHex() string {
 	return hex.EncodeToString(m.data)
 }

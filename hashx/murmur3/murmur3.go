@@ -80,6 +80,10 @@ func (b *Murmur3Basic) ToHex() string {
 	return hex.EncodeToString(b.data)
 }
 
+func (s *Murmur3Basic) Bytes() []byte {
+	return s.data
+}
+
 func New() *Murmur3Basic {
 	return new(Murmur3Basic)
 }
