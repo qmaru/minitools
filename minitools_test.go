@@ -9,16 +9,17 @@ import (
 
 	"github.com/qmaru/minitools/v2/data/dedupe"
 	"github.com/qmaru/minitools/v2/data/json/gojson"
-	"github.com/qmaru/minitools/v2/data/uuid"
+	"github.com/qmaru/minitools/v2/encoding/text"
 	"github.com/qmaru/minitools/v2/file"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/md5"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
-	"github.com/qmaru/minitools/v2/hashx/nanoid"
 	"github.com/qmaru/minitools/v2/hashx/sha256"
 	"github.com/qmaru/minitools/v2/hashx/sha512"
-	"github.com/qmaru/minitools/v2/hashx/sqids"
-	"github.com/qmaru/minitools/v2/hashx/text"
+	"github.com/qmaru/minitools/v2/random/nanoid"
+	"github.com/qmaru/minitools/v2/random/password"
+	"github.com/qmaru/minitools/v2/random/sqids"
+	"github.com/qmaru/minitools/v2/random/uuid"
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/chacha20"
@@ -78,7 +79,7 @@ func TestUUID(t *testing.T) {
 	t.Logf("UUID v4: %s", u4)
 
 	// Version 5
-	u5, err := uuidSuite.Generate(uuid.Version5, uuid.WithName("example.com"),uuid.WithNamespaceBytes([]byte("this is a 16 bit")))
+	u5, err := uuidSuite.Generate(uuid.Version5, uuid.WithName("example.com"), uuid.WithNamespaceBytes([]byte("this is a 16 bit")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -301,6 +302,17 @@ func TestSecretChacha20(t *testing.T) {
 		t.Logf("Encrypt: %v\nDecrypt: %s\n", encData, decData)
 	} else {
 		t.Error("Decryption failed")
+	}
+}
+
+func TestSecretPassword(t *testing.T) {
+	p := password.New()
+
+	pass := p.Generate(true, true, true, true, 16)
+	if pass == "" {
+		t.Error("Password generation failed")
+	} else {
+		t.Logf("Generated Password: %s", pass)
 	}
 }
 
