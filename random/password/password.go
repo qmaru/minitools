@@ -9,7 +9,7 @@ var (
 	Uppercase = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	Lowercase = []byte("abcdefghijklmnopqrstuvwxyz")
 	Number    = []byte("0123456789")
-	Symbols   = []byte("!@#-_")
+	Symbols   = []byte("!@#$%^&*()-_+=")
 )
 
 type PasswordBasic struct{}
