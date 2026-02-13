@@ -368,7 +368,7 @@ func TestSecretTotp(t *testing.T) {
 	}
 
 	// 6. remaining with key (should be close to previous remain)
-	remain2 := totpSuite.RemainingWithKey(parsedKey)
+	remain2 := totpSuite.RemainingFromKey(parsedKey)
 	t.Logf("RemainingWithKey: %v", remain2)
 
 	if remain2 <= 0 || remain2 > 30*time.Second {
