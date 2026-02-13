@@ -320,35 +320,60 @@ func TestSecretPassword(t *testing.T) {
 func TestSecretTotp(t *testing.T) {
 	totpSuite := totp.New()
 
-	// generate key
+	// 1. generate key
 	key, err := totpSuite.GenerateKey("google", "google")
 	if err != nil {
 		t.Fatal(err)
 	}
 	secret := totpSuite.SecretToString(key)
-	url := totpSuite.URLToString(key)
-	miniUrl := totpSuite.URLMinimalToString(key)
-	t.Logf("Generated TOTP Key Secret: %s", secret)
-	t.Logf("Generated TOTP Key URL: %s", url)
-	t.Logf("Generated TOTP Key Minimal URL: %s", miniUrl)
+	urlStr := totpSuite.URLToString(key)
+	miniURL := totpSuite.URLMinimalToString(key)
 
-	// generate code
+	t.Logf("Secret: %s", secret)
+	t.Logf("URL: %s", urlStr)
+	t.Logf("MiniURL: %s", miniURL)
+
+	// 2. generate code (simple)
 	code, err := totpSuite.GenerateCode(secret)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Generated TOTP Code: %s", code)
+	t.Logf("Code: %s", code)
 
-	// validate code
-	valid := totpSuite.Validate(code, secret)
-	t.Logf("Is the TOTP Code valid? %v", valid)
+	// 3. validate code
+	if !totpSuite.Validate(code, secret) {
+		t.Fatal("generated code should be valid")
+	}
 
-	// parse URL
-	parsedKey, err := totpSuite.ParseURL(url)
+	// 4. generate code with remaining
+	code2, remain, err := totpSuite.GenerateCodeWithRemaining(secret)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Parsed Key Secret from URL: %s", totpSuite.SecretToString(parsedKey))
+	t.Logf("Code2: %s, Remaining: %v", code2, remain)
+
+	if remain <= 0 || remain > 30*time.Second {
+		t.Fatalf("remaining should be in (0, 30s], got %v", remain)
+	}
+
+	// 5. parse URL and check secret
+	parsedKey, err := totpSuite.ParseURL(urlStr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsedSecret := totpSuite.SecretToString(parsedKey)
+
+	if parsedSecret != secret {
+		t.Fatalf("parsed secret mismatch: got %s, want %s", parsedSecret, secret)
+	}
+
+	// 6. remaining with key (should be close to previous remain)
+	remain2 := totpSuite.RemainingWithKey(parsedKey)
+	t.Logf("RemainingWithKey: %v", remain2)
+
+	if remain2 <= 0 || remain2 > 30*time.Second {
+		t.Fatalf("RemainingWithKey out of range: %v", remain2)
+	}
 }
 
 func TestSecretXor(t *testing.T) {

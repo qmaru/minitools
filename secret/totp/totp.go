@@ -10,19 +10,19 @@ import (
 
 type TotpBasic struct{}
 
+func New() *TotpBasic {
+	return &TotpBasic{}
+}
+
 // GenerateKey Generate a new TOTP key
 func (t *TotpBasic) GenerateKey(issuer, accountName string) (*otp.Key, error) {
-	key, err := totp.Generate(totp.GenerateOpts{
+	return totp.Generate(totp.GenerateOpts{
 		Issuer:      issuer,
 		AccountName: accountName,
 	})
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
 }
 
-// GenerateCode Generate a TOTP code for the given secret
+// GenerateCode Generate a TOTP code for the given secret (now)
 func (t *TotpBasic) GenerateCode(secret string) (string, error) {
 	return t.GenerateCodeAt(secret, time.Now())
 }
@@ -32,7 +32,41 @@ func (t *TotpBasic) GenerateCodeAt(secret string, at time.Time) (string, error) 
 	return totp.GenerateCode(secret, at)
 }
 
-// Validate Validate a TOTP code for the given secret
+// GenerateCodeWithRemaining Generate code and remaining time at the same moment
+func (t *TotpBasic) GenerateCodeWithRemaining(secret string) (string, time.Duration, error) {
+	now := time.Now()
+
+	code, err := t.GenerateCodeAt(secret, now)
+	if err != nil {
+		return "", 0, err
+	}
+
+	period := int64(30)
+	remain := period - (now.Unix() % period)
+
+	return code, time.Duration(remain) * time.Second, nil
+}
+
+// RemainingWithPeriod Get remaining time in current TOTP window with given period (e.g. 30)
+func (t *TotpBasic) RemainingWithPeriod(period int64) time.Duration {
+	if period <= 0 {
+		return 0
+	}
+	now := time.Now().Unix()
+	remain := period - (now % period)
+	return time.Duration(remain) * time.Second
+}
+
+// RemainingWithKey Get remaining time based on otp.Key (respects key.Period())
+func (t *TotpBasic) RemainingWithKey(key *otp.Key) time.Duration {
+	if key == nil {
+		return 0
+	}
+	period := int64(key.Period())
+	return t.RemainingWithPeriod(period)
+}
+
+// Validate Validate a TOTP code for the given secret (now)
 func (t *TotpBasic) Validate(code, secret string) bool {
 	return totp.Validate(code, secret)
 }
@@ -53,11 +87,7 @@ func (t *TotpBasic) ParseURL(urlStr string) (*otp.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	key, err := otp.NewKeyFromURL(otpURL.String())
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
+	return otp.NewKeyFromURL(otpURL.String())
 }
 
 // URLMinimalToString Convert the secret key to an otpauth URL with minimal parameters
@@ -86,8 +116,4 @@ func (t *TotpBasic) URLMinimalToString(key *otp.Key) string {
 	}
 
 	return u.String()
-}
-
-func New() *TotpBasic {
-	return new(TotpBasic)
 }
