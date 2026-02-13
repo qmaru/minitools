@@ -23,6 +23,7 @@ import (
 	"github.com/qmaru/minitools/v2/secret/aes/cbc"
 	"github.com/qmaru/minitools/v2/secret/aes/gcm"
 	"github.com/qmaru/minitools/v2/secret/chacha20"
+	"github.com/qmaru/minitools/v2/secret/totp"
 	"github.com/qmaru/minitools/v2/secret/xor"
 	qtime "github.com/qmaru/minitools/v2/time"
 )
@@ -314,6 +315,40 @@ func TestSecretPassword(t *testing.T) {
 	} else {
 		t.Logf("Generated Password: %s", pass)
 	}
+}
+
+func TestSecretTotp(t *testing.T) {
+	totpSuite := totp.New()
+
+	// generate key
+	key, err := totpSuite.GenerateKey("google", "google")
+	if err != nil {
+		t.Fatal(err)
+	}
+	secret := totpSuite.SecretToString(key)
+	url := totpSuite.URLToString(key)
+	miniUrl := totpSuite.URLMinimalToString(key)
+	t.Logf("Generated TOTP Key Secret: %s", secret)
+	t.Logf("Generated TOTP Key URL: %s", url)
+	t.Logf("Generated TOTP Key Minimal URL: %s", miniUrl)
+
+	// generate code
+	code, err := totpSuite.GenerateCode(secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("Generated TOTP Code: %s", code)
+
+	// validate code
+	valid := totpSuite.Validate(code, secret)
+	t.Logf("Is the TOTP Code valid? %v", valid)
+
+	// parse URL
+	parsedKey, err := totpSuite.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("Parsed Key Secret from URL: %s", totpSuite.SecretToString(parsedKey))
 }
 
 func TestSecretXor(t *testing.T) {
