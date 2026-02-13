@@ -14,11 +14,23 @@ func New() *TotpBasic {
 	return &TotpBasic{}
 }
 
-// GenerateKey Generate a new TOTP key
+// GenerateKey Generate a new TOTP key (default period = 30s)
 func (t *TotpBasic) GenerateKey(issuer, accountName string) (*otp.Key, error) {
 	return totp.Generate(totp.GenerateOpts{
 		Issuer:      issuer,
 		AccountName: accountName,
+	})
+}
+
+// GenerateKeyWithPeriod Generate a new TOTP key with custom period
+func (t *TotpBasic) GenerateKeyWithPeriod(issuer, accountName string, period uint) (*otp.Key, error) {
+	if period == 0 {
+		period = 30
+	}
+	return totp.Generate(totp.GenerateOpts{
+		Issuer:      issuer,
+		AccountName: accountName,
+		Period:      period,
 	})
 }
 
@@ -32,7 +44,16 @@ func (t *TotpBasic) GenerateCodeAt(secret string, at time.Time) (string, error) 
 	return totp.GenerateCode(secret, at)
 }
 
-// GenerateCodeWithRemaining Generate code and remaining time at the same moment
+// internal: calculate remaining time at specific moment with given period
+func (t *TotpBasic) remainingAtWithPeriod(at time.Time, period int64) time.Duration {
+	if period <= 0 {
+		return 0
+	}
+	remain := period - (at.Unix() % period)
+	return time.Duration(remain) * time.Second
+}
+
+// GenerateCodeWithRemaining Generate code and remaining time at the same moment (default period = 30s)
 func (t *TotpBasic) GenerateCodeWithRemaining(secret string) (string, time.Duration, error) {
 	now := time.Now()
 
@@ -42,19 +63,12 @@ func (t *TotpBasic) GenerateCodeWithRemaining(secret string) (string, time.Durat
 	}
 
 	period := int64(30)
-	remain := period - (now.Unix() % period)
-
-	return code, time.Duration(remain) * time.Second, nil
+	return code, t.remainingAtWithPeriod(now, period), nil
 }
 
 // RemainingWithPeriod Get remaining time in current TOTP window with given period (e.g. 30)
 func (t *TotpBasic) RemainingWithPeriod(period int64) time.Duration {
-	if period <= 0 {
-		return 0
-	}
-	now := time.Now().Unix()
-	remain := period - (now % period)
-	return time.Duration(remain) * time.Second
+	return t.remainingAtWithPeriod(time.Now(), period)
 }
 
 // RemainingWithKey Get remaining time based on otp.Key (respects key.Period())
@@ -67,8 +81,18 @@ func (t *TotpBasic) RemainingWithKey(key *otp.Key) time.Duration {
 }
 
 // Validate Validate a TOTP code for the given secret (now)
-func (t *TotpBasic) Validate(code, secret string) bool {
-	return totp.Validate(code, secret)
+func (t *TotpBasic) Validate(code, secret string) (bool, error) {
+	return t.ValidateAt(code, secret, time.Now())
+}
+
+// ValidateAt Validate a TOTP code for the given secret at a specific time
+func (t *TotpBasic) ValidateAt(code, secret string, at time.Time) (bool, error) {
+	return totp.ValidateCustom(code, secret, at, totp.ValidateOpts{
+		Period:    30,
+		Skew:      1,
+		Digits:    otp.DigitsSix,
+		Algorithm: otp.AlgorithmSHA1,
+	})
 }
 
 // SecretToString Convert the secret key to a Base32 encoded secret

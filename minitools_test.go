@@ -341,7 +341,7 @@ func TestSecretTotp(t *testing.T) {
 	t.Logf("Code: %s", code)
 
 	// 3. validate code
-	if !totpSuite.Validate(code, secret) {
+	if ok, err := totpSuite.Validate(code, secret); err != nil || !ok {
 		t.Fatal("generated code should be valid")
 	}
 
