@@ -1,13 +1,18 @@
+//go:build jsonv2
+// +build jsonv2
+
 package minitools
 
 import (
-	"bytes"
+	"fmt"
 	"runtime"
+	"strconv"
 	"testing"
 
 	"github.com/qmaru/minitools/v2/data/json/gojson"
 	"github.com/qmaru/minitools/v2/data/json/sonic"
-	"github.com/qmaru/minitools/v2/data/json/standard"
+	standardv1 "github.com/qmaru/minitools/v2/data/json/standard/v1"
+	standardv2 "github.com/qmaru/minitools/v2/data/json/standard/v2"
 	"github.com/qmaru/minitools/v2/hashx/blake3"
 	"github.com/qmaru/minitools/v2/hashx/md5"
 	"github.com/qmaru/minitools/v2/hashx/murmur3"
@@ -25,64 +30,201 @@ func init() {
 	runtime.GOMAXPROCS(1)
 }
 
+type User struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+
+	Profile struct {
+		City    string `json:"city"`
+		Country string `json:"country"`
+	} `json:"profile"`
+
+	Tags    []string `json:"tags"`
+	History []Item   `json:"history"`
+}
+
+type Item struct {
+	ItemID int     `json:"item_id"`
+	Price  float64 `json:"price"`
+}
+
+func GenerateData(count int) []User {
+	users := make([]User, count)
+
+	for i := range count {
+		u := User{
+			ID:    i,
+			Name:  "user_" + strconv.Itoa(i),
+			Email: "user_" + strconv.Itoa(i) + "@example.com",
+			Tags:  []string{"tag1", "tag2", "tag3"},
+			History: []Item{
+				{ItemID: 1, Price: 100},
+				{ItemID: 2, Price: 200},
+			},
+		}
+
+		u.Profile.City = "City_" + strconv.Itoa(i%100)
+		u.Profile.Country = "Country_" + strconv.Itoa(i%10)
+
+		users[i] = u
+	}
+
+	return users
+}
+
+func GenerateJSONBytes(count int) []byte {
+	data := GenerateData(count)
+	stdJ := standardv1.New()
+	b, _ := stdJ.Json.Marshal(data)
+	return b
+}
+
 func BenchmarkDataJson(b *testing.B) {
-	stdJ := standard.New()
+	stdJ := standardv1.New()
+	stdJ2 := standardv2.New()
 	sonicJ := sonic.New()
 	goJ := gojson.New()
 
-	jsonStr := `{"id":12345,"name":"John Doe","email":"johndoe@example.com","address":{"street":"123 Main St","city":"Springfield","state":"IL","zip":"62701","country":"USA"},"phone_numbers":[{"type":"home","number":"555-1234"},{"type":"work","number":"555-5678"}],"preferences":{"newsletter":true,"notifications":false,"theme":"dark"},"purchase_history":[{"item_id":987,"item_name":"Laptop","price":1299.99,"quantity":1,"purchase_date":"2024-01-15"},{"item_id":654,"item_name":"Headphones","price":199.99,"quantity":2,"purchase_date":"2024-02-01"}],"active":true,"last_login":"2024-11-21T15:30:00Z","meta":{"created_at":"2020-05-01T10:00:00Z","updated_at":"2024-11-20T08:00:00Z","version":"1.2.3"},"friends":[{"id":67890,"name":"Jane Smith","relationship":"friend"},{"id":23456,"name":"Bob Johnson","relationship":"colleague"}]}`
-	jsonByte := []byte(jsonStr)
-	jsonStrLen := int64(len(jsonStr))
-
 	b.ReportAllocs()
 
-	b.Run("StandardDecoder", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			var d map[string]any
-			stdDec := stdJ.Json.NewDecoder(bytes.NewReader(jsonByte))
-			stdDec.Decode(&d)
-		}
-	})
+	sizes := []int{1, 10, 100, 1000}
 
-	b.Run("GoJsonDecoder", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			var d map[string]any
-			goDec := goJ.Json.NewDecoder(bytes.NewReader(jsonByte))
-			goDec.Decode(&d)
-		}
-	})
+	for _, n := range sizes {
+		n := n
 
-	b.Run("SonicDecoder", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			var d map[string]any
-			sonicDec := sonicJ.Json.NewDecoder(bytes.NewReader(jsonByte))
-			sonicDec.Decode(&d)
-		}
-	})
+		b.Run(fmt.Sprintf("%dKB", n), func(b *testing.B) {
+			jsonByte := GenerateJSONBytes(n)
+			size := int64(len(jsonByte))
 
-	b.Run("StandardUnmarshal", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			stdJ.RawJson2Map(jsonByte)
-		}
-	})
+			// Unmarshal to struct
+			b.Run("Std/Struct", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
 
-	b.Run("GoJsonUnmarshal", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			goJ.RawJson2Map(jsonByte)
-		}
-	})
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = stdJ.Json.Unmarshal(jsonByte, &u)
+				}
+			})
 
-	b.Run("SonicUnmarshal", func(b *testing.B) {
-		b.SetBytes(jsonStrLen)
-		for i := 0; i < b.N; i++ {
-			sonicJ.RawJson2Map(jsonByte)
-		}
-	})
+			b.Run("StdV2/Struct", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = stdJ2.Json.Unmarshal(jsonByte, &u)
+				}
+			})
+
+			b.Run("GoJson/Struct", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = goJ.Json.Unmarshal(jsonByte, &u)
+				}
+			})
+
+			b.Run("Sonic/Struct", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = sonicJ.Json.Unmarshal(jsonByte, &u)
+				}
+			})
+
+			// API decode + encode
+			b.Run("Std/API", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = stdJ.Json.Unmarshal(jsonByte, &u)
+					_, _ = stdJ.Json.Marshal(&u)
+				}
+			})
+
+			b.Run("StdV2/API", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = stdJ2.Json.Unmarshal(jsonByte, &u)
+					_, _ = stdJ2.Json.Marshal(&u)
+				}
+			})
+
+			b.Run("GoJson/API", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = goJ.Json.Unmarshal(jsonByte, &u)
+					_, _ = goJ.Json.Marshal(&u)
+				}
+			})
+
+			b.Run("Sonic/API", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var u []User
+					_ = sonicJ.Json.Unmarshal(jsonByte, &u)
+					_, _ = sonicJ.Json.Marshal(&u)
+				}
+			})
+
+			// map
+			b.Run("Std/Map", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var d []map[string]any
+					_ = stdJ.Json.Unmarshal(jsonByte, &d)
+				}
+			})
+
+			b.Run("StdV2/Map", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var d []map[string]any
+					_ = stdJ2.Json.Unmarshal(jsonByte, &d)
+				}
+			})
+
+			b.Run("GoJson/Map", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var d []map[string]any
+					_ = goJ.Json.Unmarshal(jsonByte, &d)
+				}
+			})
+
+			b.Run("Sonic/Map", func(b *testing.B) {
+				b.SetBytes(size)
+				b.ResetTimer()
+
+				for i := 0; i < b.N; i++ {
+					var d []map[string]any
+					_ = sonicJ.Json.Unmarshal(jsonByte, &d)
+				}
+			})
+		})
+	}
 }
 
 func BenchmarkHashBlake3(b *testing.B) {

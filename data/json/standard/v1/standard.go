@@ -1,4 +1,4 @@
-package standard
+package standardv1
 
 import (
 	"bytes"
