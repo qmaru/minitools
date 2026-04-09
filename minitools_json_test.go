@@ -5,9 +5,12 @@ package minitools
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/qmaru/minitools/v2/data/json/gojson"
+	"github.com/qmaru/minitools/v2/data/json/sonic"
 	standardv1 "github.com/qmaru/minitools/v2/data/json/standard/v1"
 	standardv2 "github.com/qmaru/minitools/v2/data/json/standard/v2"
 )
@@ -275,4 +278,129 @@ func TestFormat(t *testing.T) {
 	if i1.String() != i2.String() {
 		t.Fatalf("indent mismatch\n%s\n%s", i1.String(), i2.String())
 	}
+}
+
+func TestBehavior(t *testing.T) {
+	std := standardv1.New()
+	stdv2 := standardv2.New()
+	goj := gojson.New()
+	sonic := sonic.New()
+
+	runUnmarshal := func(name, data string, v any) {
+		fmt.Println("====", name)
+
+		test := func(label string, fn func([]byte, any) error) {
+			err := fn([]byte(data), v)
+			fmt.Printf("%-8s err=%v\n", label, err)
+		}
+
+		test("std", std.Json.Unmarshal)
+		test("stdv2", stdv2.Json.Unmarshal)
+		test("go-json", goj.Json.Unmarshal)
+		test("sonic", sonic.Json.Unmarshal)
+	}
+
+	runMarshal := func(name string, v any) {
+		fmt.Println("====", name)
+
+		test := func(label string, fn func(any) ([]byte, error)) {
+			b, err := fn(v)
+			fmt.Printf("%-8s err=%v\n", label, err)
+			fmt.Println(label, string(b))
+		}
+
+		test("std", std.Json.Marshal)
+		test("stdv2", stdv2.Json.Marshal)
+		test("go-json", goj.Json.Marshal)
+		test("sonic", sonic.Json.Marshal)
+	}
+
+	// invalid JSON
+	type T struct {
+		ID int `json:"id"`
+	}
+
+	runUnmarshal("duplicate_key", `{"id":1,"id":2}`, &T{})
+	runUnmarshal("trailing_comma", `{"id":1,}`, &T{})
+	runUnmarshal("incomplete", `{"id":1`, &T{})
+	runUnmarshal("type_mismatch", `{"id":"123"}`, &T{})
+
+	// omitempty
+	type Profile struct {
+		City    *string `json:"city,omitempty"`
+		Country *string `json:"country,omitempty"`
+	}
+
+	type UpdateUserRequest struct {
+		Name     *string  `json:"name,omitempty"`
+		Email    *string  `json:"email,omitempty"`
+		Age      *int     `json:"age,omitempty"`
+		IsActive *bool    `json:"is_active,omitempty"`
+		Profile  *Profile `json:"profile,omitempty"`
+	}
+
+	name := "alice"
+	empty := ""
+
+	req := UpdateUserRequest{
+		Name:  &name,
+		Email: &empty,
+		Profile: &Profile{
+			Country: &empty,
+		},
+	}
+
+	runMarshal("omitempty(pointer)", req)
+
+	// zero vs omitempty
+	type ZeroTest struct {
+		IntVal int  `json:"int_val,omitempty"`
+		Bool   bool `json:"bool,omitempty"`
+	}
+
+	runMarshal("omitempty(zero)", ZeroTest{
+		IntVal: 0,
+		Bool:   false,
+	})
+
+	// ptr zero vs omitempty omitzero
+	zero := 0
+	f := false
+
+	type PtrZero struct {
+		IntPtrOmitEmpty *int `json:"int_ptr_omitempty,omitempty"`
+		IntPtrOmitZero  *int `json:"int_ptr_omitzero,omitzero"`
+
+		StrPtrOmitEmpty *string `json:"str_ptr_omitempty,omitempty"`
+		StrPtrOmitZero  *string `json:"str_ptr_omitzero,omitzero"`
+
+		BoolPtrOmitEmpty *bool `json:"bool_ptr_omitempty,omitempty"`
+		BoolPtrOmitZero  *bool `json:"bool_ptr_omitzero,omitzero"`
+
+		IntValOmitEmpty int `json:"int_val_omitempty,omitempty"`
+		IntValOmitZero  int `json:"int_val_omitzero,omitzero"`
+	}
+
+	runMarshal("omitempty(pointer_zero)", PtrZero{
+		// --- int ---
+		IntPtrOmitEmpty: &zero, // std/stdv2/go-json/sonic: non-nil pointer -> outputs 0 (omitempty does not check underlying value)
+		IntPtrOmitZero:  &zero, // std/stdv2/go-json/sonic: still outputs 0 (omitzero not applied to pointer values)
+
+		// --- string ---
+		StrPtrOmitEmpty: &empty, // std/go-json/sonic: outputs ""
+		// stdv2: "" is treated as empty JSON value -> omitted
+		StrPtrOmitZero: &empty, // std/stdv2/go-json/sonic: outputs ""
+		// (omitzero not applied to *string)
+
+		// --- bool ---
+		BoolPtrOmitEmpty: &f, // std/stdv2/go-json/sonic: outputs false
+		BoolPtrOmitZero:  &f, // std/stdv2/go-json/sonic: outputs false
+		// (omitzero not applied to *bool)
+
+		// --- non-pointer comparison ---
+		IntValOmitEmpty: 0, // std/sonic/go-json: omitted
+		// stdv2: outputs 0 (v2 no longer uses Go zero-value semantics)
+		IntValOmitZero: 0, // go-json: omitted (supports omitzero for non-pointer)
+		// std/stdv2/sonic: ignored or not implemented
+	})
 }
