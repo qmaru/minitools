@@ -5,20 +5,39 @@ import (
 	"math/big"
 )
 
-var (
-	Uppercase = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	Lowercase = []byte("abcdefghijklmnopqrstuvwxyz")
-	Number    = []byte("0123456789")
-	Symbols   = []byte("!@#$%^&*()-_+=")
-)
-
-type PasswordBasic struct{}
-
-func New() *PasswordBasic {
-	return &PasswordBasic{}
+type Charset struct {
+	Uppercase string
+	Lowercase string
+	Number    string
+	Symbols   string
 }
 
-func (p *PasswordBasic) pick(set []byte) byte {
+func DefaultCharset() Charset {
+	return Charset{
+		Uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		Lowercase: "abcdefghijklmnopqrstuvwxyz",
+		Number:    "0123456789",
+		Symbols:   "!@#$%^&*()-_+=",
+	}
+}
+
+type PasswordBasic struct {
+	Charset Charset
+}
+
+func New() *PasswordBasic {
+	return &PasswordBasic{
+		Charset: DefaultCharset(),
+	}
+}
+
+func NewWithCharset(charset Charset) *PasswordBasic {
+	return &PasswordBasic{
+		Charset: charset,
+	}
+}
+
+func (p *PasswordBasic) pick(set string) byte {
 	if len(set) == 0 {
 		panic("empty charset")
 	}
@@ -39,34 +58,44 @@ func (p *PasswordBasic) shuffle(buf []byte) {
 	}
 }
 
-func (p *PasswordBasic) Generate(
-	hasUpper bool,
-	hasLower bool,
-	hasNumber bool,
-	hasSymbol bool,
-	length int,
-) string {
-	var pool []byte
+func (p *PasswordBasic) Generate(length int) string {
+	var pool string
 	password := make([]byte, 0, length)
 
-	if hasUpper {
-		pool = append(pool, Uppercase...)
-		password = append(password, p.pick(Uppercase))
+	if p.Charset.Uppercase != "" {
+		if p.Charset.Uppercase == "" {
+			return ""
+		}
+
+		pool += p.Charset.Uppercase
+		password = append(password, p.pick(p.Charset.Uppercase))
 	}
-	if hasLower {
-		pool = append(pool, Lowercase...)
-		password = append(password, p.pick(Lowercase))
+	if p.Charset.Lowercase != "" {
+		if p.Charset.Lowercase == "" {
+			return ""
+		}
+
+		pool += p.Charset.Lowercase
+		password = append(password, p.pick(p.Charset.Lowercase))
 	}
-	if hasNumber {
-		pool = append(pool, Number...)
-		password = append(password, p.pick(Number))
+	if p.Charset.Number != "" {
+		if p.Charset.Number == "" {
+			return ""
+		}
+
+		pool += p.Charset.Number
+		password = append(password, p.pick(p.Charset.Number))
 	}
-	if hasSymbol {
-		pool = append(pool, Symbols...)
-		password = append(password, p.pick(Symbols))
+	if p.Charset.Symbols != "" {
+		if p.Charset.Symbols == "" {
+			return ""
+		}
+
+		pool += p.Charset.Symbols
+		password = append(password, p.pick(p.Charset.Symbols))
 	}
 
-	if len(pool) == 0 || length < len(password) {
+	if pool == "" || length < len(password) {
 		return ""
 	}
 

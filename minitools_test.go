@@ -309,7 +309,7 @@ func TestSecretChacha20(t *testing.T) {
 func TestSecretPassword(t *testing.T) {
 	p := password.New()
 
-	pass := p.Generate(true, true, true, true, 16)
+	pass := p.Generate(16)
 	if pass == "" {
 		t.Error("Password generation failed")
 	} else {
