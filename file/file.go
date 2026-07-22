@@ -34,6 +34,11 @@ func (fs *FileSuiteBasic) ReadFile(f string) ([]byte, error) {
 	return os.ReadFile(f)
 }
 
+// RemoveFile Remove a file
+func (fs *FileSuiteBasic) RemoveFile(f string) error {
+	return os.Remove(f)
+}
+
 // IsExist Check if the path exists
 func (fs *FileSuiteBasic) Exists(path string) bool {
 	_, err := os.Stat(path)
