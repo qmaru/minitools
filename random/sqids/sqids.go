@@ -19,11 +19,11 @@ type SqidsOptions struct {
 type SqidsBasic struct{}
 
 const (
-	AlphabetDefault  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	AlphabetReadable = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-	AlphabetUpper    = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-	AlphabetLower    = "23456789abcdefghijkmnopqrstuvwxyz"
-	AlphabetURLSafe  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+	AlphabetDefault  Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	AlphabetReadable Alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+	AlphabetUpper    Alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+	AlphabetLower    Alphabet = "23456789abcdefghijkmnopqrstuvwxyz"
+	AlphabetURLSafe  Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 )
 
 func (s *SqidsBasic) New(options SqidsOptions) (*gosqids.Sqids, error) {
