@@ -19,7 +19,7 @@ func New() *UUIDBasic {
 	return new(UUIDBasic)
 }
 
-func (u *UUIDBasic) Generate(version Version) (*uuid.UUID, error) {
+func (u *UUIDBasic) Generate(version Version) *uuid.UUID {
 	var uid uuid.UUID
 
 	switch version {
@@ -31,5 +31,5 @@ func (u *UUIDBasic) Generate(version Version) (*uuid.UUID, error) {
 		uid = uuid.NewV4()
 	}
 
-	return &uid, nil
+	return &uid
 }

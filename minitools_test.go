@@ -66,17 +66,11 @@ func TestUUID(t *testing.T) {
 	uuidSuite := uuid.New()
 
 	// Version 4
-	u4, err := uuidSuite.Generate(uuid.Version4)
-	if err != nil {
-		t.Fatal(err)
-	}
+	u4 := uuidSuite.Generate(uuid.Version4)
 	t.Logf("UUID v4: %s", u4.String())
 
 	// Version 7
-	u7, err := uuidSuite.Generate(uuid.Version7)
-	if err != nil {
-		t.Fatal(err)
-	}
+	u7 := uuidSuite.Generate(uuid.Version7)
 	t.Logf("UUID v7: %s", u7.String())
 }
 
