@@ -65,33 +65,19 @@ func TestDedupe(t *testing.T) {
 func TestUUID(t *testing.T) {
 	uuidSuite := uuid.New()
 
-	// Version 1
-	u1, err := uuidSuite.Generate(uuid.Version1, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("UUID v1: %s", u1)
-
 	// Version 4
-	u4, err := uuidSuite.Generate(uuid.Version4, nil)
+	u4, err := uuidSuite.Generate(uuid.Version4)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("UUID v4: %s", u4)
-
-	// Version 5
-	u5, err := uuidSuite.Generate(uuid.Version5, uuid.WithName("example.com"), uuid.WithNamespaceBytes([]byte("this is a 16 bit")))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("UUID v5: %s", u5)
+	t.Logf("UUID v4: %s", u4.String())
 
 	// Version 7
-	u7, err := uuidSuite.Generate(uuid.Version7, nil)
+	u7, err := uuidSuite.Generate(uuid.Version7)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("UUID v7: %s", u7)
+	t.Logf("UUID v7: %s", u7.String())
 }
 
 func TestDataJson(t *testing.T) {

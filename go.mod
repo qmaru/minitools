@@ -5,7 +5,6 @@ go 1.26
 require (
 	github.com/bytedance/sonic v1.15.2
 	github.com/goccy/go-json v0.10.6
-	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/pquerna/otp v1.5.0
 	github.com/spaolacci/murmur3 v1.1.0
