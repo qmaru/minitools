@@ -4,7 +4,6 @@ go 1.26
 
 require (
 	github.com/bytedance/sonic v1.15.2
-	github.com/go-json-experiment/json v0.0.0-20260623181947-01eb4420fa68
 	github.com/goccy/go-json v0.10.6
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/matoous/go-nanoid/v2 v2.1.0

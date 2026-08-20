@@ -1,5 +1,4 @@
-//go:build jsonv2
-// +build jsonv2
+//go:build go1.27
 
 package standardv2
 
@@ -8,8 +7,8 @@ import (
 	"errors"
 	"io"
 
-	sjson "github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
+	"encoding/json/jsontext"
+	sjson "encoding/json/v2"
 
 	"github.com/qmaru/minitools/v2/data/json/common"
 )

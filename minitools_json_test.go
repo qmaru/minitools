@@ -1,5 +1,4 @@
-//go:build jsonv2
-// +build jsonv2
+//go:build go1.27
 
 package minitools
 
