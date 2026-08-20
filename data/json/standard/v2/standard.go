@@ -14,6 +14,7 @@ import (
 )
 
 type RawMessage = jsontext.Value
+type Token = jsontext.Token
 
 type StandardJSONBasic = common.DataJsonDefault[StandardJSON]
 

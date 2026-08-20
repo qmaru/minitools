@@ -4,7 +4,9 @@ package minitools
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"reflect"
 	"testing"
 
@@ -215,6 +217,75 @@ func TestEncoder_Stream(t *testing.T) {
 				t.Fatal(err)
 			}
 			t.Logf("decoded: %#v", out)
+		}
+	})
+}
+
+func TestJSONText_Stream(t *testing.T) {
+	v2 := standardv2.New()
+
+	inputs := []any{
+		map[string]any{"a": 1},
+		map[string]any{"b": "x"},
+		[]any{1, 2, 3},
+	}
+
+	var buf bytes.Buffer
+
+	t.Run("encode", func(t *testing.T) {
+		enc := v2.Json.NewEncoder(&buf)
+
+		for _, input := range inputs {
+			if err := enc.Encode(input); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		t.Logf("encoded: %s", buf.String())
+	})
+
+	t.Run("decode", func(t *testing.T) {
+		dec := v2.Json.NewDecoder(bytes.NewReader(buf.Bytes()))
+
+		var results []any
+		for {
+			var v any
+			if err := dec.Decode(&v); err != nil {
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				t.Fatal(err)
+			}
+
+			results = append(results, v)
+			t.Logf("decoded: %#v", v)
+		}
+
+		if len(results) != len(inputs) {
+			t.Fatalf("decode count mismatch: got %d, want %d",
+				len(results), len(inputs))
+		}
+	})
+
+	t.Run("token", func(t *testing.T) {
+		dec := v2.Json.NewDecoder(bytes.NewReader(buf.Bytes()))
+
+		var tokens []standardv2.Token
+		for {
+			token, err := dec.Token()
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				t.Fatal(err)
+			}
+
+			tokens = append(tokens, token)
+			t.Logf("token: %v", token)
+		}
+
+		if len(tokens) == 0 {
+			t.Fatal("no tokens decoded")
 		}
 	})
 }

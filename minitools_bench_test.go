@@ -347,7 +347,7 @@ func BenchmarkHashMurmur3(b *testing.B) {
 
 	b.ReportAllocs()
 	b.SetBytes(dataLen)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		bhash.Sum64(data)
 	}
 }
@@ -357,7 +357,7 @@ func BenchmarkHashNanoid(b *testing.B) {
 
 	b.ReportAllocs()
 	b.SetBytes(21)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		nhash.New()
 	}
 }
@@ -372,7 +372,7 @@ func BenchmarkHashSqids(b *testing.B) {
 
 	b.ReportAllocs()
 	b.SetBytes(dataLen)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		s.Encode(data)
 	}
 }
@@ -459,7 +459,7 @@ func BenchmarkSecretXor(b *testing.B) {
 
 	b.ReportAllocs()
 	b.SetBytes(dataLen)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		xsecret.Cipher(data, key)
 	}
 }
