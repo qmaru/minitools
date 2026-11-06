@@ -4,9 +4,9 @@ package standardv2
 
 import (
 	"bytes"
-	"errors"
 	"io"
 
+	stdjson "encoding/json"
 	"encoding/json/jsontext"
 	sjson "encoding/json/v2"
 
@@ -22,7 +22,8 @@ type StandardJSONBasic = common.DataJsonDefault[StandardJSON]
 type StandardJSON struct{}
 
 type Decoder struct {
-	dec *jsontext.Decoder
+	dec       *jsontext.Decoder
+	useNumber bool
 }
 
 type Encoder struct {
@@ -36,6 +37,9 @@ func (d *Decoder) Decode(v any) error {
 	val, err := d.dec.ReadValue()
 	if err != nil {
 		return err
+	}
+	if d.useNumber {
+		return sjson.Unmarshal(val, v, numberOptions())
 	}
 	return sjson.Unmarshal(val, v)
 }
@@ -88,9 +92,12 @@ func (s StandardJSON) NewEncoder(w io.Writer) *Encoder {
 	}
 }
 
-// NewDecoderWithNumber not supported in jsontext package, so return nil
-func (s StandardJSON) NewDecoderWithNumber(r io.Reader) *jsontext.Decoder {
-	return nil
+// NewDecoderWithNumber decodes numbers in interface values as json.Number
+func (s StandardJSON) NewDecoderWithNumber(r io.Reader) *Decoder {
+	return &Decoder{
+		dec:       jsontext.NewDecoder(r),
+		useNumber: true,
+	}
 }
 
 func (s StandardJSON) Marshal(v any) ([]byte, error) {
@@ -106,16 +113,44 @@ func (s StandardJSON) Unmarshal(data []byte, v any) error {
 }
 
 func (s StandardJSON) UnmarshalNumber(data []byte, v any) error {
-	return sjson.Unmarshal(data, v,
-		sjson.WithUnmarshalers(
-			sjson.UnmarshalFromFunc(func(dec *jsontext.Decoder, val *any) error {
-				if dec.PeekKind() == '0' { // JSON number
-					*val = jsontext.Value(nil)
-				}
-				return errors.ErrUnsupported
-			}),
-		),
-	)
+	return sjson.Unmarshal(data, v, numberOptions())
+}
+
+// numberOptions makes numbers decoded into interface values be json.Number
+func numberOptions() sjson.Options {
+	return sjson.WithUnmarshalers(sjson.UnmarshalFromFunc(unmarshalAnyNumber))
+}
+
+func unmarshalAnyNumber(dec *jsontext.Decoder, p *any) error {
+	switch dec.PeekKind() {
+	case jsontext.KindBeginObject:
+		var m map[string]any
+		if err := sjson.UnmarshalDecode(dec, &m, numberOptions()); err != nil {
+			return err
+		}
+		*p = m
+		return nil
+	case jsontext.KindBeginArray:
+		var a []any
+		if err := sjson.UnmarshalDecode(dec, &a, numberOptions()); err != nil {
+			return err
+		}
+		*p = a
+		return nil
+	case jsontext.KindNumber:
+		val, err := dec.ReadValue()
+		if err != nil {
+			return err
+		}
+		*p = stdjson.Number(val)
+		return nil
+	default:
+		val, err := dec.ReadValue()
+		if err != nil {
+			return err
+		}
+		return sjson.Unmarshal(val, p)
+	}
 }
 
 func (s StandardJSON) Valid(data []byte) bool {
